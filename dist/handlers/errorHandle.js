@@ -28,13 +28,13 @@ const debug_1 = __importDefault(require("debug"));
 /* Module */
 const debug = debug_1.default('module:error-handler');
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function errorHandle(app, errorCode, errorMessage) {
+function errorHandle(app, errorCode, errorMessageKey) {
     return async (error, req, res, next) => {
         debug('Handling request error');
         const status = error.status || node_result_module_1.HttpStatus.internalError;
         const result = new node_result_module_1.default(node_result_module_1.ResultStatus.ERROR, {
             code: errorCode,
-            message: errorMessage,
+            message: res.lang(errorMessageKey),
             error: error.message
         });
         res.status(status);

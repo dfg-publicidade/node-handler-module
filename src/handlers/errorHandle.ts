@@ -8,7 +8,7 @@ import { NextFunction, Request, Response } from 'express';
 const debug: appDebugger.IDebugger = appDebugger('module:error-handler');
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function errorHandle(app: App, errorCode: string, errorMessage: string): (error: any, req: Request, res: Response, next: NextFunction) => void {
+function errorHandle(app: App, errorCode: string, errorMessageKey: string): (error: any, req: Request, res: Response, next: NextFunction) => void {
     return async (error: any, req: Request, res: Response, next: NextFunction): Promise<any> => {
         debug('Handling request error');
 
@@ -16,7 +16,7 @@ function errorHandle(app: App, errorCode: string, errorMessage: string): (error:
 
         const result: Result = new Result(ResultStatus.ERROR, {
             code: errorCode,
-            message: errorMessage,
+            message: res.lang(errorMessageKey),
             error: error.message
         });
 
