@@ -26,11 +26,11 @@ const node_log_module_1 = __importDefault(require("@dfgpublicidade/node-log-modu
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
 const debug_1 = __importDefault(require("debug"));
 /* Module */
-const debug = debug_1.default('module:nofound-handler');
+const debug = debug_1.default('claretiano:nofound-handler');
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function notFoundHandle(app, errorCode, errorMessage) {
     return async (req, res, next) => {
-        debug('Handling resource not found error');
+        debug('Handling not found ');
         if (req.method === 'OPTIONS') {
             res.header('Access-Control-Allow-Methods', '');
             res.header('Access-Control-Allow-Headers', app.config.api.allowedHeaders);
@@ -43,7 +43,7 @@ function notFoundHandle(app, errorCode, errorMessage) {
             });
             res.status(node_result_module_1.HttpStatus.notImplemented);
             res.json(result);
-            await node_log_module_1.default.emit(app, req, app.config.log.collections.notfound, {
+            await node_log_module_1.default.emit(app, req, 'sys_nao_encontrados', {
                 code: node_result_module_1.HttpStatus.notImplemented,
                 error: 'Not found'
             });
