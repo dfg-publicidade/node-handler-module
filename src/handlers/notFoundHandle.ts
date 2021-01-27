@@ -1,18 +1,16 @@
 import App from '@dfgpublicidade/node-app-module';
 import Log from '@dfgpublicidade/node-log-module';
-import Result, { ResultStatus } from '@dfgpublicidade/node-result-module';
+import Result, { HttpStatus, ResultStatus } from '@dfgpublicidade/node-result-module';
 import appDebugger from 'debug';
 import { NextFunction, Request, Response } from 'express';
-import ErrorTable from '../refs/errorTable';
-import HttpStatus from '../refs/httpStatus';
 
 /* Module */
-const debug: appDebugger.IDebugger = appDebugger('claretiano:nofound-handler');
+const debug: appDebugger.IDebugger = appDebugger('module:nofound-handler');
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function notFoundHandle(app: App): (req: Request, res: Response, next?: NextFunction) => void {
+function notFoundHandle(app: App, errorCode: string, errorMessage: string): (req: Request, res: Response, next?: NextFunction) => void {
     return async (req: Request, res: Response, next?: NextFunction): Promise<any> => {
-        debug('Realizando tratamento para recurso não encontrado');
+        debug('Handling resource not found error');
 
         if (req.method === 'OPTIONS') {
             res.header('Access-Control-Allow-Methods', '');
@@ -21,14 +19,14 @@ function notFoundHandle(app: App): (req: Request, res: Response, next?: NextFunc
         }
         else {
             const result: Result = new Result(ResultStatus.ERROR, {
-                code: ErrorTable.core.recursoInexistente,
-                message: res.lang('recursoInexistente')
+                code: errorCode,
+                message: errorMessage
             });
 
             res.status(HttpStatus.notImplemented);
             res.json(result);
 
-            await Log.emit(app, req, 'sys_nao_encontrados', {
+            await Log.emit(app, req, app.config.log.collections.notfound, {
                 code: HttpStatus.notImplemented,
                 error: 'Not found'
             });

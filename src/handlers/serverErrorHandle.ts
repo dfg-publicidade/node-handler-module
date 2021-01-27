@@ -1,12 +1,12 @@
+import Util from '@dfgpublicidade/node-util-module';
 import appDebugger from 'debug';
-import Util from '../utils/util';
 
 /* Module */
-const debug: appDebugger.IDebugger = appDebugger('claretiano:servererror-handler');
+const debug: appDebugger.IDebugger = appDebugger('module:servererror-handler');
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function serverErrorHandle(error: Error, port?: string | number): void {
-    debug('Realizando tratamento de erro fatal');
+    debug('Handling server error');
 
     switch (error.name) {
         case 'EACCES': {

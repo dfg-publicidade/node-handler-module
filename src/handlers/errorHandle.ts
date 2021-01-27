@@ -1,31 +1,29 @@
 import App from '@dfgpublicidade/node-app-module';
 import Log from '@dfgpublicidade/node-log-module';
-import Result, { ResultStatus } from '@dfgpublicidade/node-result-module';
+import Result, { HttpStatus, ResultStatus } from '@dfgpublicidade/node-result-module';
 import appDebugger from 'debug';
 import { NextFunction, Request, Response } from 'express';
-import ErrorTable from '../refs/errorTable';
-import HttpStatus from '../refs/httpStatus';
 
 /* Module */
-const debug: appDebugger.IDebugger = appDebugger('nodule:error-handler');
+const debug: appDebugger.IDebugger = appDebugger('module:error-handler');
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function errorHandle(app: App): (error: any, req: Request, res: Response, next: NextFunction) => void {
+function errorHandle(app: App, errorCode: string, errorMessage: string): (error: any, req: Request, res: Response, next: NextFunction) => void {
     return async (error: any, req: Request, res: Response, next: NextFunction): Promise<any> => {
-        debug('Realizando tratamento de erro');
+        debug('Handling request error');
 
         const status: number = error.status || HttpStatus.internalError;
 
         const result: Result = new Result(ResultStatus.ERROR, {
-            code: ErrorTable.core.erroInterno,
-            message: res.lang('erroInterno'),
+            code: errorCode,
+            message: errorMessage,
             error: error.message
         });
 
         res.status(status);
         res.json(result);
 
-        await Log.emit(app, req, 'sys_erros', {
+        await Log.emit(app, req, app.config.log.collections.error, {
             code: status,
             error: error.message
         });

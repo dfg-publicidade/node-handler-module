@@ -25,14 +25,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_log_module_1 = __importDefault(require("@dfgpublicidade/node-log-module"));
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
 const debug_1 = __importDefault(require("debug"));
-const errorTable_1 = __importDefault(require("../refs/errorTable"));
-const httpStatus_1 = __importDefault(require("../refs/httpStatus"));
 /* Module */
-const debug = debug_1.default('claretiano:nofound-handler');
+const debug = debug_1.default('module:nofound-handler');
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function notFoundHandle(app) {
+function notFoundHandle(app, errorCode, errorMessage) {
     return async (req, res, next) => {
-        debug('Realizando tratamento para recurso não encontrado');
+        debug('Handling resource not found error');
         if (req.method === 'OPTIONS') {
             res.header('Access-Control-Allow-Methods', '');
             res.header('Access-Control-Allow-Headers', app.config.api.allowedHeaders);
@@ -40,13 +38,13 @@ function notFoundHandle(app) {
         }
         else {
             const result = new node_result_module_1.default(node_result_module_1.ResultStatus.ERROR, {
-                code: errorTable_1.default.core.recursoInexistente,
-                message: res.lang('recursoInexistente')
+                code: errorCode,
+                message: errorMessage
             });
-            res.status(httpStatus_1.default.notImplemented);
+            res.status(node_result_module_1.HttpStatus.notImplemented);
             res.json(result);
-            await node_log_module_1.default.emit(app, req, 'sys_nao_encontrados', {
-                code: httpStatus_1.default.notImplemented,
+            await node_log_module_1.default.emit(app, req, app.config.log.collections.notfound, {
+                code: node_result_module_1.HttpStatus.notImplemented,
                 error: 'Not found'
             });
         }

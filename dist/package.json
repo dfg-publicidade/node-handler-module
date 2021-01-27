@@ -12,7 +12,9 @@
     },
     "dependencies": {
         "@dfgpublicidade/node-app-module": "git+https://github.com/dfg-publicidade/node-app-module.git",
-        "@dfgpublicidade/node-log-module": "git+ssh://git@github.com/dfg-publicidade/node-log-module.git"
+        "@dfgpublicidade/node-log-module": "git+ssh://git@github.com/dfg-publicidade/node-log-module.git",
+        "@dfgpublicidade/node-result-module": "git+ssh://git@github.com/dfg-publicidade/node-result-module.git",
+        "@dfgpublicidade/node-util-module": "git+ssh://git@github.com/dfg-publicidade/node-util-module.git"
     },
     "devDependencies": {
         "@dfgpublicidade/eslint-config": "git+ssh://git@github.com/dfg-publicidade/eslint-config.git",

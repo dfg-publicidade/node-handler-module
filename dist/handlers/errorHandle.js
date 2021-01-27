@@ -25,23 +25,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_log_module_1 = __importDefault(require("@dfgpublicidade/node-log-module"));
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
 const debug_1 = __importDefault(require("debug"));
-const errorTable_1 = __importDefault(require("../refs/errorTable"));
-const httpStatus_1 = __importDefault(require("../refs/httpStatus"));
 /* Module */
-const debug = debug_1.default('nodule:error-handler');
+const debug = debug_1.default('module:error-handler');
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function errorHandle(app) {
+function errorHandle(app, errorCode, errorMessage) {
     return async (error, req, res, next) => {
-        debug('Realizando tratamento de erro');
-        const status = error.status || httpStatus_1.default.internalError;
+        debug('Handling request error');
+        const status = error.status || node_result_module_1.HttpStatus.internalError;
         const result = new node_result_module_1.default(node_result_module_1.ResultStatus.ERROR, {
-            code: errorTable_1.default.core.erroInterno,
-            message: res.lang('erroInterno'),
+            code: errorCode,
+            message: errorMessage,
             error: error.message
         });
         res.status(status);
         res.json(result);
-        await node_log_module_1.default.emit(app, req, 'sys_erros', {
+        await node_log_module_1.default.emit(app, req, app.config.log.collections.error, {
             code: status,
             error: error.message
         });
