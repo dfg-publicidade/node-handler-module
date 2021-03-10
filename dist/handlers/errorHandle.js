@@ -31,7 +31,7 @@ const debug = debug_1.default('module:error-handler');
 function errorHandle(app, errorCode, errorMessageKey) {
     return async (error, req, res, next) => {
         debug('Handling request error');
-        const status = error.status || node_result_module_1.HttpStatus.internalError;
+        const status = node_result_module_1.HttpStatus.internalError;
         const result = new node_result_module_1.default(node_result_module_1.ResultStatus.ERROR, {
             code: errorCode,
             message: res.lang(errorMessageKey),
