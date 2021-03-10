@@ -12,7 +12,7 @@ function errorHandle(app: App, errorCode: string, errorMessageKey: string): (err
     return async (error: any, req: Request, res: Response, next: NextFunction): Promise<any> => {
         debug('Handling request error');
 
-        const status: number = error.status || HttpStatus.internalError;
+        const status: number = HttpStatus.internalError;
 
         const result: Result = new Result(ResultStatus.ERROR, {
             code: errorCode,
