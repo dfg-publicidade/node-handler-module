@@ -5,7 +5,7 @@ import appDebugger from 'debug';
 import { NextFunction, Request, Response } from 'express';
 
 /* Module */
-const debug: appDebugger.IDebugger = appDebugger('claretiano:nofound-handler');
+const debug: appDebugger.IDebugger = appDebugger('module:nofound-handler');
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function notFoundHandle(app: App, errorCode: string, errorMessageKey: string): (req: Request, res: Response, next?: NextFunction) => void {
