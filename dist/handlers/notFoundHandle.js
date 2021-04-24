@@ -26,7 +26,7 @@ const node_log_module_1 = __importDefault(require("@dfgpublicidade/node-log-modu
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
 const debug_1 = __importDefault(require("debug"));
 /* Module */
-const debug = debug_1.default('claretiano:nofound-handler');
+const debug = debug_1.default('module:nofound-handler');
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function notFoundHandle(app, errorCode, errorMessageKey) {
     return async (req, res, next) => {
