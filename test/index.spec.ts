@@ -123,7 +123,7 @@ describe('index.ts', (): void => {
 
         // eslint-disable-next-line no-magic-numbers
         expect(res).to.have.status(500);
-        expect(res.body).to.not.be.empty;
+        expect(res.body).to.not.be.undefined;
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('error');
         expect(res.body).to.have.property('content');
@@ -153,7 +153,7 @@ describe('index.ts', (): void => {
 
         // eslint-disable-next-line no-magic-numbers
         expect(res).to.have.status(501);
-        expect(res.body).to.not.be.empty;
+        expect(res.body).to.not.be.undefined;
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('error');
         expect(res.body).to.have.property('content');
@@ -182,7 +182,7 @@ describe('index.ts', (): void => {
 
         // eslint-disable-next-line no-magic-numbers
         expect(res).to.have.status(200);
-        expect(res.header).to.not.be.empty;
+        expect(res.header).to.not.be.undefined;
         expect(res.header).to.have.property('access-control-allow-methods').eq('');
         expect(res.header).to.have.property('access-control-allow-headers').eq(app.config.api.allowedHeaders);
     });
