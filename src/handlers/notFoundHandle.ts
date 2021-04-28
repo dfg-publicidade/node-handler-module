@@ -10,7 +10,7 @@ const debug: appDebugger.IDebugger = appDebugger('module:nofound-handler');
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function notFoundHandle(app: App, errorCode: string, errorMessageKey: string): (req: Request, res: Response, next?: NextFunction) => void {
     return async (req: Request, res: Response, next?: NextFunction): Promise<any> => {
-        debug('Handling not found');
+        debug(`Handling not found: ${req.originalUrl}`);
 
         if (req.method === 'OPTIONS') {
             res.header('Access-Control-Allow-Methods', '');
