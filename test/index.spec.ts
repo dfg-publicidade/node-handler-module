@@ -75,6 +75,11 @@ describe('index.ts', (): void => {
             next(new Error('Test error'));
         });
 
+        exp.get('/id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            // eslint-disable-next-line no-magic-numbers
+            notFoundHandle(app, '0002', 'registroNaoEncontrado', 404)(req, res, next);
+        });
+
         exp.use(notFoundHandle(app, '0000', 'recursoInexistente'));
         exp.use(errorHandle(app, '0001', 'erroInterno'));
 
@@ -97,9 +102,13 @@ describe('index.ts', (): void => {
     after(async (): Promise<void> => {
         try {
             await db.collection(errorCollection).drop();
-            await db.collection(notfoundCollection).drop();
+        }
+        catch (error: any) {
+            //
+        }
 
-            client.close();
+        try {
+            await db.collection(notfoundCollection).drop();
         }
         catch (error: any) {
             //
@@ -187,7 +196,36 @@ describe('index.ts', (): void => {
         expect(res.header).to.have.property('access-control-allow-headers').eq(app.config.api.allowedHeaders);
     });
 
-    it('4. serverErrorHandle', async (): Promise<void> => {
+    it('4. notFoundHandle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/id');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(404);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('error');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('code').eq('0002');
+        expect(res.body.content).to.have.property('message').eq('registroNaoEncontrado');
+
+        const log: any = await db.collection(notfoundCollection).findOne({});
+
+        expect(log).exist.and.have.property('app');
+        expect(log).exist.and.have.property('request');
+        expect(log).exist.and.have.property('action').eq('/id');
+        expect(log).exist.and.have.property('method').eq('GET');
+        expect(log).exist.and.have.property('ip');
+        expect(log).exist.and.have.property('content')
+            // eslint-disable-next-line no-magic-numbers
+            .which.have.property('code').eq(404);
+        expect(log).exist.and.have.property('content')
+            .which.have.property('error').eq('Not found');
+        expect(log).exist.and.have.property('time');
+
+        await db.collection(notfoundCollection).drop();
+    });
+
+    it('5. serverErrorHandle', async (): Promise<void> => {
         const error: Error = new Error();
 
         serverErrorHandle(error);
@@ -196,7 +234,7 @@ describe('index.ts', (): void => {
         sinon.assert.called((process.exit as any));
     });
 
-    it('5. serverErrorHandle', async (): Promise<void> => {
+    it('6. serverErrorHandle', async (): Promise<void> => {
         const error: Error = new Error();
         error.name = 'EACCES';
         error.message = 'listen';
@@ -209,7 +247,7 @@ describe('index.ts', (): void => {
         sinon.assert.called((process.exit as any));
     });
 
-    it('6. serverErrorHandle', async (): Promise<void> => {
+    it('7. serverErrorHandle', async (): Promise<void> => {
         const error: Error = new Error();
         error.name = 'EADDRINUSE';
         error.message = 'listen';
