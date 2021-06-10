@@ -44,7 +44,7 @@ function notFoundHandle(app, errorCode, errorMessageKey, status) {
             res.status(status ? status : node_result_module_1.HttpStatus.notImplemented);
             res.json(result);
             await node_log_module_1.default.emit(app, req, app.config.log.collections.notFound, {
-                code: node_result_module_1.HttpStatus.notImplemented,
+                code: status ? status : node_result_module_1.HttpStatus.notImplemented,
                 error: 'Not found'
             });
         }

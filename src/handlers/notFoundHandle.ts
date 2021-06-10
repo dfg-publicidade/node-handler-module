@@ -27,7 +27,7 @@ function notFoundHandle(app: App, errorCode: string, errorMessageKey: string, st
             res.json(result);
 
             await Log.emit(app, req, app.config.log.collections.notFound, {
-                code: HttpStatus.notImplemented,
+                code: status ? status : HttpStatus.notImplemented,
                 error: 'Not found'
             });
         }
