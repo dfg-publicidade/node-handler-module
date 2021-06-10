@@ -28,7 +28,7 @@ const debug_1 = __importDefault(require("debug"));
 /* Module */
 const debug = debug_1.default('module:nofound-handler');
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function notFoundHandle(app, errorCode, errorMessageKey) {
+function notFoundHandle(app, errorCode, errorMessageKey, status) {
     return async (req, res, next) => {
         debug(`Handling not found: ${req.originalUrl}`);
         if (req.method === 'OPTIONS') {
@@ -41,7 +41,7 @@ function notFoundHandle(app, errorCode, errorMessageKey) {
                 code: errorCode,
                 message: res.lang(errorMessageKey)
             });
-            res.status(node_result_module_1.HttpStatus.notImplemented);
+            res.status(status ? status : node_result_module_1.HttpStatus.notImplemented);
             res.json(result);
             await node_log_module_1.default.emit(app, req, app.config.log.collections.notFound, {
                 code: node_result_module_1.HttpStatus.notImplemented,

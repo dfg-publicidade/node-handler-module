@@ -8,7 +8,7 @@ import { NextFunction, Request, Response } from 'express';
 const debug: appDebugger.IDebugger = appDebugger('module:nofound-handler');
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function notFoundHandle(app: App, errorCode: string, errorMessageKey: string): (req: Request, res: Response, next?: NextFunction) => void {
+function notFoundHandle(app: App, errorCode: string, errorMessageKey: string, status?: number): (req: Request, res: Response, next?: NextFunction) => void {
     return async (req: Request, res: Response, next?: NextFunction): Promise<any> => {
         debug(`Handling not found: ${req.originalUrl}`);
 
@@ -23,7 +23,7 @@ function notFoundHandle(app: App, errorCode: string, errorMessageKey: string): (
                 message: res.lang(errorMessageKey)
             });
 
-            res.status(HttpStatus.notImplemented);
+            res.status(status ? status : HttpStatus.notImplemented);
             res.json(result);
 
             await Log.emit(app, req, app.config.log.collections.notFound, {

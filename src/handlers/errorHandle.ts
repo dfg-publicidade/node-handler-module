@@ -25,6 +25,7 @@ function errorHandle(app: App, errorCode: string, errorMessageKey: string): (err
 
         await Log.emit(app, req, app.config.log.collections.error, {
             code: status,
+            errorCode: error.code,
             error: error.message
         });
 

@@ -41,6 +41,7 @@ function errorHandle(app, errorCode, errorMessageKey) {
         res.json(result);
         await node_log_module_1.default.emit(app, req, app.config.log.collections.error, {
             code: status,
+            errorCode: error.code,
             error: error.message
         });
         // eslint-disable-next-line no-console
