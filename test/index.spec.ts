@@ -64,6 +64,8 @@ describe('index.ts', (): void => {
             }
         });
 
+        app.add('db', db);
+
         exp.use((req: Request, res: Response, next: NextFunction): void => {
             res.lang = (key: string): string => key;
 
