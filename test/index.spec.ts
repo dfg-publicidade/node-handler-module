@@ -6,6 +6,7 @@ import { after, before, describe, it } from 'mocha';
 import { Db, MongoClient } from 'mongodb';
 import * as sinon from 'sinon';
 import { errorHandle, notFoundHandle, serverErrorHandle } from '../src';
+
 import ChaiHttp = require('chai-http');
 
 /* Tests */
@@ -60,9 +61,7 @@ describe('index.ts', (): void => {
                         error: errorCollection
                     }
                 }
-            },
-            connectionName: '',
-            db
+            }
         });
 
         exp.use((req: Request, res: Response, next: NextFunction): void => {
