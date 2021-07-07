@@ -78,11 +78,11 @@ describe('index.ts', (): void => {
 
         exp.get('/id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             // eslint-disable-next-line no-magic-numbers
-            notFoundHandle(app, '0002', 'registroNaoEncontrado', 404)(req, res, next);
+            notFoundHandle(app, 'registroNaoEncontrado', 404)(req, res, next);
         });
 
-        exp.use(notFoundHandle(app, '0000', 'recursoInexistente'));
-        exp.use(errorHandle(app, '0001', 'erroInterno'));
+        exp.use(notFoundHandle(app, 'recursoInexistente'));
+        exp.use(errorHandle(app, 'erroInterno'));
 
         sinon.stub(process, 'exit');
 
@@ -137,7 +137,6 @@ describe('index.ts', (): void => {
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('error');
         expect(res.body).to.have.property('content');
-        expect(res.body.content).to.have.property('code').eq('0001');
         expect(res.body.content).to.have.property('message').eq('erroInterno');
         expect(res.body.content).to.have.property('error').eq('Test error');
 
@@ -167,7 +166,6 @@ describe('index.ts', (): void => {
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('error');
         expect(res.body).to.have.property('content');
-        expect(res.body.content).to.have.property('code').eq('0000');
         expect(res.body.content).to.have.property('message').eq('recursoInexistente');
 
         const log: any = await db.collection(notfoundCollection).findOne({});
@@ -206,7 +204,6 @@ describe('index.ts', (): void => {
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('error');
         expect(res.body).to.have.property('content');
-        expect(res.body.content).to.have.property('code').eq('0002');
         expect(res.body.content).to.have.property('message').eq('registroNaoEncontrado');
 
         const log: any = await db.collection(notfoundCollection).findOne({});
