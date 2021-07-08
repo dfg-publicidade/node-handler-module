@@ -6,6 +6,8 @@ import { after, before, describe, it } from 'mocha';
 import { Db, MongoClient } from 'mongodb';
 import * as sinon from 'sinon';
 import { errorHandle, notFoundHandle, serverErrorHandle } from '../src';
+import invalidDataHandle from '../src/handlers/invalidDataHandle';
+import successHandle from '../src/handlers/successHandle';
 
 import ChaiHttp = require('chai-http');
 
@@ -79,6 +81,28 @@ describe('index.ts', (): void => {
         exp.get('/id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             // eslint-disable-next-line no-magic-numbers
             notFoundHandle(app, 'registroNaoEncontrado', 404)(req, res, next);
+        });
+
+        exp.get('/invalid-data', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            invalidDataHandle(app, 'dadosInvalidos', [{
+                message: 'Nome não informado'
+            }])(req, res, next);
+        });
+
+        exp.get('/invalid-media', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            invalidDataHandle(app, 'dadosInvalidos', [{
+                message: 'Formato de mídia não suportado'
+                // eslint-disable-next-line no-magic-numbers
+            }], 415)(req, res, next);
+        });
+
+        exp.get('/created', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            // eslint-disable-next-line no-magic-numbers
+            successHandle(app, 'criado', 201)(req, res, next);
+        });
+
+        exp.get('/success', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            successHandle(app, 'sucesso')(req, res, next);
         });
 
         exp.use(notFoundHandle(app, 'recursoInexistente'));
@@ -164,7 +188,7 @@ describe('index.ts', (): void => {
         expect(res).to.have.status(501);
         expect(res.body).to.not.be.undefined;
         expect(res.body).to.have.property('time');
-        expect(res.body).to.have.property('status').eq('error');
+        expect(res.body).to.have.property('status').eq('warning');
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('message').eq('recursoInexistente');
 
@@ -202,7 +226,7 @@ describe('index.ts', (): void => {
         expect(res).to.have.status(404);
         expect(res.body).to.not.be.undefined;
         expect(res.body).to.have.property('time');
-        expect(res.body).to.have.property('status').eq('error');
+        expect(res.body).to.have.property('status').eq('warning');
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('message').eq('registroNaoEncontrado');
 
@@ -221,6 +245,75 @@ describe('index.ts', (): void => {
         expect(log).exist.and.have.property('time');
 
         await db.collection(notfoundCollection).drop();
+    });
+
+    it('5. invalidDataHandle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-data');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(400);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq('dadosInvalidos');
+
+        expect(res.body.content.errors_validation).to.be.not.empty;
+        expect(res.body.content.errors_validation[0]).to.be.eq('Nome não informado');
+    });
+
+    it('6. invalidDataHandle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-media');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(415);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq('dadosInvalidos');
+
+        expect(res.body.content.errors_validation).to.be.not.empty;
+        expect(res.body.content.errors_validation[0]).to.be.eq('Formato de mídia não suportado');
+    });
+
+    it('7. successHandle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/created');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(201);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq('criado');
+    });
+
+    it('8. successHandle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq('sucesso');
+    });
+
+    it('6. invalidDataHandle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-media');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(415);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq('dadosInvalidos');
+
+        expect(res.body.content.errors_validation).to.be.not.empty;
+        expect(res.body.content.errors_validation[0]).to.be.eq('Formato de mídia não suportado');
     });
 
     it('5. serverErrorHandle', async (): Promise<void> => {
