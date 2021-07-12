@@ -6,7 +6,7 @@ import { after, before, describe, it } from 'mocha';
 import { Db, MongoClient } from 'mongodb';
 import * as sinon from 'sinon';
 import { errorHandle, notFoundHandle, serverErrorHandle } from '../src';
-import invalidDataHandle from '../src/handlers/invalidDataHandle';
+import invalidRequestHandle from '../src/handlers/invalidRequestHandle';
 import successHandle from '../src/handlers/successHandle';
 
 import ChaiHttp = require('chai-http');
@@ -83,14 +83,18 @@ describe('index.ts', (): void => {
             notFoundHandle(app, 'registroNaoEncontrado', 404)(req, res, next);
         });
 
-        exp.get('/invalid-data', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            invalidDataHandle(app, 'dadosInvalidos', [{
+        exp.get('/invalid-request', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            invalidRequestHandle(app, 'dadosInvalidos')(req, res, next);
+        });
+
+        exp.get('/invalid-request-message', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            invalidRequestHandle(app, 'dadosInvalidos', [{
                 message: 'Nome não informado'
             }])(req, res, next);
         });
 
         exp.get('/invalid-media', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            invalidDataHandle(app, 'dadosInvalidos', [{
+            invalidRequestHandle(app, 'dadosInvalidos', [{
                 message: 'Formato de mídia não suportado'
                 // eslint-disable-next-line no-magic-numbers
             }], 415)(req, res, next);
@@ -247,8 +251,20 @@ describe('index.ts', (): void => {
         await db.collection(notfoundCollection).drop();
     });
 
-    it('5. invalidDataHandle', async (): Promise<void> => {
-        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-data');
+    it('5. invalidRequestHandle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-request');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(400);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq('dadosInvalidos');
+    });
+
+    it('5. invalidRequestHandle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-request-message');
 
         // eslint-disable-next-line no-magic-numbers
         expect(res).to.have.status(400);
@@ -262,7 +278,7 @@ describe('index.ts', (): void => {
         expect(res.body.content.errors_validation[0]).to.be.eq('Nome não informado');
     });
 
-    it('6. invalidDataHandle', async (): Promise<void> => {
+    it('6. invalidRequestHandle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-media');
 
         // eslint-disable-next-line no-magic-numbers
@@ -301,7 +317,7 @@ describe('index.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('sucesso');
     });
 
-    it('6. invalidDataHandle', async (): Promise<void> => {
+    it('6. invalidRequestHandle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-media');
 
         // eslint-disable-next-line no-magic-numbers

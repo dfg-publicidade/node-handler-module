@@ -25,18 +25,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
 const debug_1 = __importDefault(require("debug"));
 /* Module */
-const debug = debug_1.default('module:invalid-data-handler');
+const debug = debug_1.default('module:invalid-request-handler');
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function invalidDataHandle(app, messageKey, errors, status) {
+function invalidRequestHandle(app, messageKey, errors, status) {
     return async (req, res, next) => {
         debug('Handling invalid data');
         const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, {
             message: res.lang(messageKey),
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            errors_validation: errors.map((error) => error.message)
+            errors_validation: errors === null || errors === void 0 ? void 0 : errors.map((error) => error.message)
         });
         res.status(status ? status : node_result_module_1.HttpStatus.badRequest);
         res.json(result);
     };
 }
-exports.default = invalidDataHandle;
+exports.default = invalidRequestHandle;
