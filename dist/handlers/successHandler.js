@@ -26,15 +26,16 @@ const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-m
 const debug_1 = __importDefault(require("debug"));
 /* Module */
 const debug = debug_1.default('module:success-handler');
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function successHandle(app, messageKey, status) {
-    return async (req, res, next) => {
-        debug('Handling sucess');
-        const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, {
-            message: res.lang(messageKey)
-        });
-        res.status(status ? status : node_result_module_1.HttpStatus.success);
-        res.json(result);
-    };
+class SuccessHandler {
+    static handle(app, messageKey, status) {
+        return async (req, res, next) => {
+            debug('Handling sucess');
+            const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, {
+                message: res.lang(messageKey)
+            });
+            res.status(status ? status : node_result_module_1.HttpStatus.success);
+            res.json(result);
+        };
+    }
 }
-exports.default = successHandle;
+exports.default = SuccessHandler;

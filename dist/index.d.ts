@@ -1,6 +1,6 @@
-import errorHandle from './handlers/errorHandle';
-import invalidRequestHandle from './handlers/invalidRequestHandle';
-import notFoundHandle from './handlers/notFoundHandle';
-import serverErrorHandle from './handlers/serverErrorHandle';
-import successHandle from './handlers/successHandle';
-export { errorHandle, invalidRequestHandle, notFoundHandle, serverErrorHandle, successHandle };
+import ErrorHandler from './handlers/errorHandler';
+import InvalidRequestHandler from './handlers/invalidRequestHandler';
+import NotFoundHandler from './handlers/notFoundHandler';
+import ServerErrorHandler from './handlers/serverErrorHandler';
+import SuccessHandle from './handlers/successHandler';
+export { ErrorHandler, InvalidRequestHandler, NotFoundHandler, ServerErrorHandler, SuccessHandle };

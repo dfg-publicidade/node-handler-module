@@ -2,12 +2,12 @@ import App from '@dfgpublicidade/node-app-module';
 import chai, { expect } from 'chai';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
+import i18n from 'i18n';
 import { after, before, describe, it } from 'mocha';
 import { Db, MongoClient } from 'mongodb';
 import * as sinon from 'sinon';
-import { errorHandle, notFoundHandle, serverErrorHandle } from '../src';
-import invalidRequestHandle from '../src/handlers/invalidRequestHandle';
-import successHandle from '../src/handlers/successHandle';
+import { ErrorHandler, InvalidRequestHandler, NotFoundHandler, ServerErrorHandler, SuccessHandle } from '../src';
+import InvalidUploadHandler from '../src/handlers/invalidUploadHandler';
 
 import ChaiHttp = require('chai-http');
 
@@ -68,11 +68,20 @@ describe('index.ts', (): void => {
 
         app.add('db', db);
 
-        exp.use((req: Request, res: Response, next: NextFunction): void => {
-            res.lang = (key: string): string => key;
-
-            next();
+        i18n.configure({
+            defaultLocale: 'pt-BR',
+            locales: ['pt-BR'],
+            directory: 'test/lang',
+            autoReload: true,
+            updateFiles: false,
+            api: {
+                __: 'lang',
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                __n: 'langN'
+            }
         });
+
+        exp.use(i18n.init);
 
         exp.get('/error', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             next(new Error('Test error'));
@@ -80,21 +89,21 @@ describe('index.ts', (): void => {
 
         exp.get('/id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             // eslint-disable-next-line no-magic-numbers
-            notFoundHandle(app, 'registroNaoEncontrado', 404)(req, res, next);
+            NotFoundHandler.handle(app, 'registroNaoEncontrado', 404)(req, res, next);
         });
 
         exp.get('/invalid-request', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            invalidRequestHandle(app, 'dadosInvalidos')(req, res, next);
+            InvalidRequestHandler.handle(app, 'dadosInvalidos')(req, res, next);
         });
 
         exp.get('/invalid-request-message', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            invalidRequestHandle(app, 'dadosInvalidos', [{
+            InvalidRequestHandler.handle(app, 'dadosInvalidos', [{
                 message: 'Nome não informado'
             }])(req, res, next);
         });
 
         exp.get('/invalid-media', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            invalidRequestHandle(app, 'dadosInvalidos', [{
+            InvalidRequestHandler.handle(app, 'dadosInvalidos', [{
                 message: 'Formato de mídia não suportado'
                 // eslint-disable-next-line no-magic-numbers
             }], 415)(req, res, next);
@@ -102,15 +111,56 @@ describe('index.ts', (): void => {
 
         exp.get('/created', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             // eslint-disable-next-line no-magic-numbers
-            successHandle(app, 'criado', 201)(req, res, next);
+            SuccessHandle.handle(app, 'criado', 201)(req, res, next);
         });
 
         exp.get('/success', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            successHandle(app, 'sucesso')(req, res, next);
+            SuccessHandle.handle(app, 'sucesso')(req, res, next);
         });
 
-        exp.use(notFoundHandle(app, 'recursoInexistente'));
-        exp.use(errorHandle(app, 'erroInterno'));
+        exp.post('/empty-file', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            InvalidUploadHandler.handle(app, 'EMPTY_FILE', {})(req, res, next);
+        });
+
+        exp.post('/file-too-large', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            InvalidUploadHandler.handle(app, 'FILE_TOO_LARGE', {
+                rules: {
+                    sizeInKBytes: 100
+                }
+            })(req, res, next);
+        });
+
+        exp.post('/file-too-large-2', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            InvalidUploadHandler.handle(app, 'FILE_TOO_LARGE', {
+                rules: {
+                    sizeInKBytes: 5000
+                }
+            })(req, res, next);
+        });
+
+        exp.post('/invalid-extension', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            InvalidUploadHandler.handle(app, 'INVALID_EXTENSION', {
+                rules: {
+                    ext: ['.doc', '.docx', '.pdf']
+                }
+            })(req, res, next);
+        });
+
+        exp.post('/out-of-dimension', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            InvalidUploadHandler.handle(app, 'OUT_OF_DIMENSION', {
+                rules: {
+                    width: 150,
+                    height: 150
+                }
+            })(req, res, next);
+        });
+
+        exp.post('/invalid-mode', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            InvalidUploadHandler.handle(app, 'INVALID_MODE', {})(req, res, next);
+        });
+
+        exp.use(NotFoundHandler.handle(app, 'recursoInexistente'));
+        exp.use(ErrorHandler.handle(app, 'erroInterno'));
 
         sinon.stub(process, 'exit');
 
@@ -156,7 +206,7 @@ describe('index.ts', (): void => {
         });
     });
 
-    it('1. errorHandle', async (): Promise<void> => {
+    it('1. ErrorHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/error');
 
         // eslint-disable-next-line no-magic-numbers
@@ -185,7 +235,7 @@ describe('index.ts', (): void => {
         await db.collection(errorCollection).drop();
     });
 
-    it('2. notFoundHandle', async (): Promise<void> => {
+    it('2. NotFoundHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/notfound');
 
         // eslint-disable-next-line no-magic-numbers
@@ -213,7 +263,7 @@ describe('index.ts', (): void => {
         await db.collection(notfoundCollection).drop();
     });
 
-    it('3. notFoundHandle', async (): Promise<void> => {
+    it('3. NotFoundHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().options('/notfound');
 
         // eslint-disable-next-line no-magic-numbers
@@ -223,7 +273,7 @@ describe('index.ts', (): void => {
         expect(res.header).to.have.property('access-control-allow-headers').eq(app.config.api.allowedHeaders);
     });
 
-    it('4. notFoundHandle', async (): Promise<void> => {
+    it('4. NotFoundHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/id');
 
         // eslint-disable-next-line no-magic-numbers
@@ -251,7 +301,7 @@ describe('index.ts', (): void => {
         await db.collection(notfoundCollection).drop();
     });
 
-    it('5. invalidRequestHandle', async (): Promise<void> => {
+    it('5. InvalidRequestHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-request');
 
         // eslint-disable-next-line no-magic-numbers
@@ -263,7 +313,7 @@ describe('index.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('dadosInvalidos');
     });
 
-    it('5. invalidRequestHandle', async (): Promise<void> => {
+    it('5. InvalidRequestHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-request-message');
 
         // eslint-disable-next-line no-magic-numbers
@@ -278,7 +328,7 @@ describe('index.ts', (): void => {
         expect(res.body.content.errors_validation[0]).to.be.eq('Nome não informado');
     });
 
-    it('6. invalidRequestHandle', async (): Promise<void> => {
+    it('6. InvalidRequestHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-media');
 
         // eslint-disable-next-line no-magic-numbers
@@ -293,7 +343,7 @@ describe('index.ts', (): void => {
         expect(res.body.content.errors_validation[0]).to.be.eq('Formato de mídia não suportado');
     });
 
-    it('7. successHandle', async (): Promise<void> => {
+    it('7. SuccessHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/created');
 
         // eslint-disable-next-line no-magic-numbers
@@ -305,7 +355,7 @@ describe('index.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('criado');
     });
 
-    it('8. successHandle', async (): Promise<void> => {
+    it('8. SuccessHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success');
 
         // eslint-disable-next-line no-magic-numbers
@@ -317,7 +367,7 @@ describe('index.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('sucesso');
     });
 
-    it('6. invalidRequestHandle', async (): Promise<void> => {
+    it('6. InvalidRequestHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-media');
 
         // eslint-disable-next-line no-magic-numbers
@@ -332,36 +382,108 @@ describe('index.ts', (): void => {
         expect(res.body.content.errors_validation[0]).to.be.eq('Formato de mídia não suportado');
     });
 
-    it('5. serverErrorHandle', async (): Promise<void> => {
+    it('7. InvalidUploadHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/empty-file');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(400);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq(i18n.__('imageFileNotSent'));
+    });
+
+    it('8. InvalidUploadHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/file-too-large');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(400);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq(i18n.__('fileSizeExceeded').replace(':size', '100Kb'));
+    });
+
+    it('9. InvalidUploadHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/file-too-large-2');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(400);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq(i18n.__('fileSizeExceeded').replace(':size', '5Mb'));
+    });
+
+    it('10. InvalidUploadHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/invalid-extension');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(400);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq(i18n.__('invalidExtension').replace(':extensions', '.doc, .docx, .pdf'));
+    });
+
+    it('11. InvalidUploadHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/out-of-dimension');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(400);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq(i18n.__('invalidDimensions').replace(':width', '150').replace(':height', '150'));
+    });
+
+    it('12. InvalidUploadHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/invalid-mode');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(400);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('warning');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('message').eq(i18n.__('invalidColorMode'));
+    });
+
+    it('13. ServerErrorHandler', async (): Promise<void> => {
         const error: Error = new Error();
 
-        serverErrorHandle(error);
+        ServerErrorHandler.handle(error);
 
         expect(logMsg).to.be.equal(error);
         sinon.assert.called((process.exit as any));
     });
 
-    it('6. serverErrorHandle', async (): Promise<void> => {
+    it('14. ServerErrorHandler', async (): Promise<void> => {
         const error: Error = new Error();
         error.name = 'EACCES';
         error.message = 'listen';
 
         const port: number = 80;
 
-        serverErrorHandle(error, port);
+        ServerErrorHandler.handle(error, port);
 
         expect(logMsg).to.be.equal(`port ${port} requires elevated privileges`);
         sinon.assert.called((process.exit as any));
     });
 
-    it('7. serverErrorHandle', async (): Promise<void> => {
+    it('15. ServerErrorHandler', async (): Promise<void> => {
         const error: Error = new Error();
         error.name = 'EADDRINUSE';
         error.message = 'listen';
 
         const port: number = 80;
 
-        serverErrorHandle(error, port);
+        ServerErrorHandler.handle(error, port);
 
         expect(logMsg).to.be.equal(`port ${port} is already in use`);
         sinon.assert.called((process.exit as any));

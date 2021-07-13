@@ -26,25 +26,28 @@ const node_log_module_1 = __importDefault(require("@dfgpublicidade/node-log-modu
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
 const debug_1 = __importDefault(require("debug"));
 /* Module */
-const debug = debug_1.default('module:error-handler');
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function errorHandle(app, errorMessageKey) {
-    return async (error, req, res, next) => {
-        debug('Handling request error');
-        const status = node_result_module_1.HttpStatus.internalError;
-        const result = new node_result_module_1.default(node_result_module_1.ResultStatus.ERROR, {
-            message: res.lang(errorMessageKey),
-            error: error.message
-        });
-        res.status(status);
-        res.json(result);
-        await node_log_module_1.default.emit(app, req, app.config.log.collections.error, {
-            code: status,
-            errorCode: error.code,
-            error: error.message
-        });
-        // eslint-disable-next-line no-console
-        console.error(error);
-    };
+const debug = debug_1.default('module:nofound-handler');
+class NotFoundHandler {
+    static handle(app, messageKey, status) {
+        return async (req, res, next) => {
+            debug(`Handling not found: ${req.originalUrl}`);
+            if (req.method === 'OPTIONS') {
+                res.header('Access-Control-Allow-Methods', '');
+                res.header('Access-Control-Allow-Headers', app.config.api.allowedHeaders);
+                res.end();
+            }
+            else {
+                const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, {
+                    message: res.lang(messageKey)
+                });
+                res.status(status ? status : node_result_module_1.HttpStatus.notImplemented);
+                res.json(result);
+                await node_log_module_1.default.emit(app, req, app.config.log.collections.notFound, {
+                    code: status ? status : node_result_module_1.HttpStatus.notImplemented,
+                    error: 'Not found'
+                });
+            }
+        };
+    }
 }
-exports.default = errorHandle;
+exports.default = NotFoundHandler;
