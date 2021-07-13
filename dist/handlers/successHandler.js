@@ -27,12 +27,10 @@ const debug_1 = __importDefault(require("debug"));
 /* Module */
 const debug = debug_1.default('module:success-handler');
 class SuccessHandler {
-    static handle(app, messageKey, status) {
+    static handle(app, content, status) {
         return async (req, res, next) => {
             debug('Handling sucess');
-            const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, {
-                message: res.lang(messageKey)
-            });
+            const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, content);
             res.status(status ? status : node_result_module_1.HttpStatus.success);
             res.json(result);
         };

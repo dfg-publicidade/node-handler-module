@@ -6,7 +6,7 @@ import i18n from 'i18n';
 import { after, before, describe, it } from 'mocha';
 import { Db, MongoClient } from 'mongodb';
 import * as sinon from 'sinon';
-import { ErrorHandler, InvalidRequestHandler, NotFoundHandler, ServerErrorHandler, SuccessHandle } from '../src';
+import { ErrorHandler, InvalidRequestHandler, NotFoundHandler, ServerErrorHandler, SuccessHandler } from '../src';
 import InvalidUploadHandler from '../src/handlers/invalidUploadHandler';
 
 import ChaiHttp = require('chai-http');
@@ -111,11 +111,11 @@ describe('index.ts', (): void => {
 
         exp.get('/created', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             // eslint-disable-next-line no-magic-numbers
-            SuccessHandle.handle(app, 'criado', 201)(req, res, next);
+            SuccessHandler.handle(app, {message: 'criado'}, 201)(req, res, next);
         });
 
         exp.get('/success', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            SuccessHandle.handle(app, 'sucesso')(req, res, next);
+            SuccessHandler.handle(app, {message: 'sucesso'})(req, res, next);
         });
 
         exp.post('/empty-file', async (req: Request, res: Response, next: NextFunction): Promise<void> => {

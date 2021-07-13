@@ -7,13 +7,11 @@ import { NextFunction, Request, Response } from 'express';
 const debug: appDebugger.IDebugger = appDebugger('module:success-handler');
 
 class SuccessHandler {
-    public static handle(app: App, messageKey: string, status?: number): (req: Request, res: Response, next?: NextFunction) => Promise<void> {
+    public static handle(app: App, content: any, status?: number): (req: Request, res: Response, next?: NextFunction) => Promise<void> {
         return async (req: Request, res: Response, next?: NextFunction): Promise<any> => {
             debug('Handling sucess');
 
-            const result: Result = new Result(ResultStatus.SUCCESS, {
-                message: res.lang(messageKey)
-            });
+            const result: Result = new Result(ResultStatus.SUCCESS, content);
 
             res.status(status ? status : HttpStatus.success);
             res.json(result);
