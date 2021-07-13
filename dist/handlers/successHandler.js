@@ -23,16 +23,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
+const node_strings_module_1 = __importDefault(require("@dfgpublicidade/node-strings-module"));
 const debug_1 = __importDefault(require("debug"));
 /* Module */
 const debug = debug_1.default('module:success-handler');
 class SuccessHandler {
-    static handle(app, content, status) {
+    static handle(app, content, status, options) {
         return async (req, res, next) => {
             debug('Handling sucess');
-            const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, content);
             res.status(status ? status : node_result_module_1.HttpStatus.success);
-            res.json(result);
+            if (options === null || options === void 0 ? void 0 : options.contentDisposition) {
+                switch (options.contentDisposition) {
+                    case 'inline': {
+                        res.header('Content-Disposition', 'inline');
+                        break;
+                    }
+                    case 'attachment': {
+                        const filename = options.filename
+                            ? `filename="${node_strings_module_1.default.toUrl(options.filename)}${options.ext}"`
+                            : '';
+                        res.header('Content-Disposition', `attachment; ${filename}`);
+                        break;
+                    }
+                }
+            }
+            if (options === null || options === void 0 ? void 0 : options.contentType) {
+                res.header('Content-Type', options.contentType);
+                res.write(content);
+                res.end();
+            }
+            else {
+                const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, content);
+                res.json(result);
+            }
         };
     }
 }

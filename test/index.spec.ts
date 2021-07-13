@@ -1,4 +1,5 @@
 import App from '@dfgpublicidade/node-app-module';
+import { HttpStatus } from '@dfgpublicidade/node-result-module';
 import chai, { expect } from 'chai';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
@@ -111,11 +112,34 @@ describe('index.ts', (): void => {
 
         exp.get('/created', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             // eslint-disable-next-line no-magic-numbers
-            SuccessHandler.handle(app, {message: 'criado'}, 201)(req, res, next);
+            SuccessHandler.handle(app, {message: 'criado'}, HttpStatus.created)(req, res, next);
         });
 
         exp.get('/success', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             SuccessHandler.handle(app, {message: 'sucesso'})(req, res, next);
+        });
+
+        exp.get('/success-file', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            SuccessHandler.handle(app, 'sucesso', HttpStatus.success, {
+                contentType: 'text/plain',
+                contentDisposition: 'inline'
+            })(req, res, next);
+        });
+
+        exp.get('/success-file-2', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            SuccessHandler.handle(app, 'sucesso', HttpStatus.success, {
+                contentType: 'text/plain',
+                contentDisposition: 'attachment',
+                filename: 'text',
+                ext: '.txt'
+            })(req, res, next);
+        });
+
+        exp.get('/success-file-3', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            SuccessHandler.handle(app, 'sucesso', HttpStatus.success, {
+                contentType: 'text/plain',
+                contentDisposition: 'attachment'
+            })(req, res, next);
         });
 
         exp.post('/empty-file', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -365,6 +389,39 @@ describe('index.ts', (): void => {
         expect(res.body).to.have.property('status').eq('success');
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('message').eq('sucesso');
+    });
+
+    it('9. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-file');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.header).to.have.property('content-type').eq('text/plain; charset=utf-8');
+        expect(res.header).to.have.property('content-disposition').eq('inline');
+        expect(res.text).to.not.be.undefined;
+        expect(res.text).to.be.eq('sucesso');
+    });
+
+    it('10. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-file-2');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.header).to.have.property('content-type').eq('text/plain; charset=utf-8');
+        expect(res.header).to.have.property('content-disposition').eq('attachment; filename="text.txt"');
+        expect(res.text).to.not.be.undefined;
+        expect(res.text).to.be.eq('sucesso');
+    });
+
+    it('11. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-file-3');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.header).to.have.property('content-type').eq('text/plain; charset=utf-8');
+        expect(res.header).to.have.property('content-disposition').eq('attachment;');
+        expect(res.text).to.not.be.undefined;
+        expect(res.text).to.be.eq('sucesso');
     });
 
     it('6. InvalidRequestHandler', async (): Promise<void> => {
