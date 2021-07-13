@@ -9,7 +9,7 @@ const debug: appDebugger.IDebugger = appDebugger('module:invalid-request-handler
 class InvalidRequestHandler {
     public static handle(app: App, messageKey: string, errors?: { message: string }[], status?: number): (req: Request, res: Response, next?: NextFunction) => Promise<void> {
         return async (req: Request, res: Response, next?: NextFunction): Promise<void> => {
-            debug('Handling invalid upload');
+            debug('Handling invalid request');
 
             const result: Result = new Result(ResultStatus.WARNING, {
                 message: res.lang(messageKey),

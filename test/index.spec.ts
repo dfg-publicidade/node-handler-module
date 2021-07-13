@@ -88,100 +88,100 @@ describe('index.ts', (): void => {
             next(new Error('Test error'));
         });
 
-        exp.get('/id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.get('/id', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             // eslint-disable-next-line no-magic-numbers
-            NotFoundHandler.handle(app, 'registroNaoEncontrado', 404)(req, res, next);
-        });
+            NotFoundHandler.handle(app, 'registroNaoEncontrado', 404)(req, res, next)
+        );
 
-        exp.get('/invalid-request', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            InvalidRequestHandler.handle(app, 'dadosInvalidos')(req, res, next);
-        });
+        exp.get('/invalid-request', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
+            InvalidRequestHandler.handle(app, 'dadosInvalidos')(req, res, next)
+        );
 
-        exp.get('/invalid-request-message', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.get('/invalid-request-message', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             InvalidRequestHandler.handle(app, 'dadosInvalidos', [{
                 message: 'Nome não informado'
-            }])(req, res, next);
-        });
+            }])(req, res, next)
+        );
 
-        exp.get('/invalid-media', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.get('/invalid-media', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             InvalidRequestHandler.handle(app, 'dadosInvalidos', [{
                 message: 'Formato de mídia não suportado'
                 // eslint-disable-next-line no-magic-numbers
-            }], 415)(req, res, next);
-        });
+            }], 415)(req, res, next)
+        );
 
-        exp.get('/created', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.get('/created', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             // eslint-disable-next-line no-magic-numbers
-            SuccessHandler.handle(app, {message: 'criado'}, HttpStatus.created)(req, res, next);
-        });
+            SuccessHandler.handle(app, { message: 'criado' }, HttpStatus.created)(req, res, next)
+        );
 
-        exp.get('/success', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            SuccessHandler.handle(app, {message: 'sucesso'})(req, res, next);
-        });
+        exp.get('/success', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
+            SuccessHandler.handle(app, { message: 'sucesso' })(req, res, next)
+        );
 
-        exp.get('/success-file', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.get('/success-file', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             SuccessHandler.handle(app, 'sucesso', HttpStatus.success, {
                 contentType: 'text/plain',
                 contentDisposition: 'inline'
-            })(req, res, next);
-        });
+            })(req, res, next)
+        );
 
-        exp.get('/success-file-2', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.get('/success-file-2', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             SuccessHandler.handle(app, 'sucesso', HttpStatus.success, {
                 contentType: 'text/plain',
                 contentDisposition: 'attachment',
                 filename: 'text',
                 ext: '.txt'
-            })(req, res, next);
-        });
+            })(req, res, next)
+        );
 
-        exp.get('/success-file-3', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.get('/success-file-3', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             SuccessHandler.handle(app, 'sucesso', HttpStatus.success, {
                 contentType: 'text/plain',
                 contentDisposition: 'attachment'
-            })(req, res, next);
-        });
+            })(req, res, next)
+        );
 
-        exp.post('/empty-file', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            InvalidUploadHandler.handle(app, 'EMPTY_FILE', {})(req, res, next);
-        });
+        exp.post('/empty-file', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
+            InvalidUploadHandler.handle(app, 'EMPTY_FILE', {})(req, res, next)
+        );
 
-        exp.post('/file-too-large', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.post('/file-too-large', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             InvalidUploadHandler.handle(app, 'FILE_TOO_LARGE', {
                 rules: {
                     sizeInKBytes: 100
                 }
-            })(req, res, next);
-        });
+            })(req, res, next)
+        );
 
-        exp.post('/file-too-large-2', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.post('/file-too-large-2', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             InvalidUploadHandler.handle(app, 'FILE_TOO_LARGE', {
                 rules: {
                     sizeInKBytes: 5000
                 }
-            })(req, res, next);
-        });
+            })(req, res, next)
+        );
 
-        exp.post('/invalid-extension', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.post('/invalid-extension', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             InvalidUploadHandler.handle(app, 'INVALID_EXTENSION', {
                 rules: {
                     ext: ['.doc', '.docx', '.pdf']
                 }
-            })(req, res, next);
-        });
+            })(req, res, next)
+        );
 
-        exp.post('/out-of-dimension', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        exp.post('/out-of-dimension', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             InvalidUploadHandler.handle(app, 'OUT_OF_DIMENSION', {
                 rules: {
                     width: 150,
                     height: 150
                 }
-            })(req, res, next);
-        });
+            })(req, res, next)
+        );
 
-        exp.post('/invalid-mode', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            InvalidUploadHandler.handle(app, 'INVALID_MODE', {})(req, res, next);
-        });
+        exp.post('/invalid-mode', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
+            InvalidUploadHandler.handle(app, 'INVALID_MODE', {})(req, res, next)
+        );
 
         exp.use(NotFoundHandler.handle(app, 'recursoInexistente'));
         exp.use(ErrorHandler.handle(app, 'erroInterno'));

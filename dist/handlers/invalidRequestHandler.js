@@ -29,7 +29,7 @@ const debug = debug_1.default('module:invalid-request-handler');
 class InvalidRequestHandler {
     static handle(app, messageKey, errors, status) {
         return async (req, res, next) => {
-            debug('Handling invalid upload');
+            debug('Handling invalid request');
             const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, {
                 message: res.lang(messageKey),
                 // eslint-disable-next-line @typescript-eslint/naming-convention
