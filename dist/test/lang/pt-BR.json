@@ -1,5 +1,5 @@
 {
-	"imageFileNotSent": "Nenhum arquivo foi recebido",
+	"fileNotSent": "Nenhum arquivo foi recebido",
 	"fileSizeExceeded": "O tamanho do arquivo excede o limite permitido (:size).",
 	"invalidExtension": "O arquivo é inválido (extensões permitidas :extensions).",
 	"invalidDimensions": "A imagem está fora das dimensões solicitadas (:widthx:height px).",

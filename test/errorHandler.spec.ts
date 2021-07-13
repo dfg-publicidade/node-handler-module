@@ -83,7 +83,7 @@ describe('errorHandler.ts', (): void => {
             next(new Error('Test error'));
         });
 
-        exp.use(ErrorHandler.handle(app, 'erroInterno'));
+        exp.use(ErrorHandler.handle(app));
 
         return new Promise<void>((
             resolve: () => void

@@ -172,7 +172,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('warning');
         expect(res.body).to.have.property('content');
-        expect(res.body.content).to.have.property('message').eq(i18n.__('imageFileNotSent'));
+        expect(res.body.content).to.have.property('message').eq(i18n.__('fileNotSent'));
     });
 
     it('3. InvalidUploadHandler', async (): Promise<void> => {

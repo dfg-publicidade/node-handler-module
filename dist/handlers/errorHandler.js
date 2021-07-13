@@ -28,12 +28,12 @@ const debug_1 = __importDefault(require("debug"));
 /* Module */
 const debug = debug_1.default('module:error-handler');
 class ErrorHandler {
-    static handle(app, errorMessageKey) {
+    static handle(app) {
         return async (error, req, res, next) => {
             debug('Handling request error');
             const status = node_result_module_1.HttpStatus.internalError;
             const result = new node_result_module_1.default(node_result_module_1.ResultStatus.ERROR, {
-                message: res.lang ? res.lang(errorMessageKey) : 'An error has occurred',
+                message: res.lang ? res.lang('internalError') : 'An error has occurred',
                 error: error.message
             });
             res.status(status);

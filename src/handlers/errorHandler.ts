@@ -8,14 +8,14 @@ import { NextFunction, Request, Response } from 'express';
 const debug: appDebugger.IDebugger = appDebugger('module:error-handler');
 
 class ErrorHandler {
-    public static handle(app: App, errorMessageKey: string): (error: any, req: Request, res: Response, next?: NextFunction) => Promise<void> {
+    public static handle(app: App): (error: any, req: Request, res: Response, next?: NextFunction) => Promise<void> {
         return async (error: any, req: Request, res: Response, next?: NextFunction): Promise<void> => {
             debug('Handling request error');
 
             const status: number = HttpStatus.internalError;
 
             const result: Result = new Result(ResultStatus.ERROR, {
-                message: res.lang ? res.lang(errorMessageKey) : 'An error has occurred',
+                message: res.lang ? res.lang('internalError') : 'An error has occurred',
                 error: error.message
             });
 

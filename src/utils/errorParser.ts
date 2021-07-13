@@ -45,7 +45,7 @@ class ErrorParser {
         switch (error) {
             case 'EMPTY_FILE': {
                 message = res.lang
-                    ? res.lang('imageFileNotSent')
+                    ? res.lang('fileNotSent')
                     : 'File not sent';
 
                 break;
