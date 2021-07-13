@@ -1,4 +1,5 @@
 import App from '@dfgpublicidade/node-app-module';
+import { HttpStatus } from '@dfgpublicidade/node-result-module';
 import chai, { expect } from 'chai';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
@@ -75,17 +76,17 @@ describe('notFoundHandler.ts', (): void => {
 
         exp.get('/id', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             // eslint-disable-next-line no-magic-numbers
-            NotFoundHandler.handle(app, 'registroNaoEncontrado', 404)(req, res, next)
+            NotFoundHandler.handle(app, 'registroNaoEncontrado')(req, res, next)
         );
 
         exp.use(i18n.init);
 
         exp.get('/id/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             // eslint-disable-next-line no-magic-numbers
-            NotFoundHandler.handle(app, 'registroNaoEncontrado', 404)(req, res, next)
+            NotFoundHandler.handle(app, 'registroNaoEncontrado')(req, res, next)
         );
 
-        exp.use(NotFoundHandler.handle(app, 'recursoInexistente'));
+        exp.use(NotFoundHandler.handle(app, 'recursoInexistente', HttpStatus.notImplemented));
 
         return new Promise<void>((
             resolve: () => void

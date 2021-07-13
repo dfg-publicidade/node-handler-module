@@ -22,11 +22,11 @@ class NotFoundHandler {
                     message: res.lang ? res.lang(messageKey) : 'Not found'
                 });
 
-                res.status(status ? status : HttpStatus.notImplemented);
+                res.status(status ? status : HttpStatus.notFound);
                 res.json(result);
 
                 await Log.emit(app, req, app.config.log.collections.notFound, {
-                    code: status ? status : HttpStatus.notImplemented,
+                    code: status ? status : HttpStatus.notFound,
                     error: 'Not found'
                 });
             }

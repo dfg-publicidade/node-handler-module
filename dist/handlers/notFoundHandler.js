@@ -40,10 +40,10 @@ class NotFoundHandler {
                 const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, {
                     message: res.lang ? res.lang(messageKey) : 'Not found'
                 });
-                res.status(status ? status : node_result_module_1.HttpStatus.notImplemented);
+                res.status(status ? status : node_result_module_1.HttpStatus.notFound);
                 res.json(result);
                 await node_log_module_1.default.emit(app, req, app.config.log.collections.notFound, {
-                    code: status ? status : node_result_module_1.HttpStatus.notImplemented,
+                    code: status ? status : node_result_module_1.HttpStatus.notFound,
                     error: 'Not found'
                 });
             }
