@@ -15,7 +15,7 @@ class ErrorHandler {
             const status: number = HttpStatus.internalError;
 
             const result: Result = new Result(ResultStatus.ERROR, {
-                message: res.lang(errorMessageKey),
+                message: res.lang ? res.lang(errorMessageKey) : 'An error has occurred',
                 error: error.message
             });
 

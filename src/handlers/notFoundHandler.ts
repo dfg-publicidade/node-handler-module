@@ -19,7 +19,7 @@ class NotFoundHandler {
             }
             else {
                 const result: Result = new Result(ResultStatus.WARNING, {
-                    message: res.lang(messageKey)
+                    message: res.lang ? res.lang(messageKey) : 'Not found'
                 });
 
                 res.status(status ? status : HttpStatus.notImplemented);

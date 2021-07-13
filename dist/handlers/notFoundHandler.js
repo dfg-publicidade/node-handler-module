@@ -38,7 +38,7 @@ class NotFoundHandler {
             }
             else {
                 const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, {
-                    message: res.lang(messageKey)
+                    message: res.lang ? res.lang(messageKey) : 'Not found'
                 });
                 res.status(status ? status : node_result_module_1.HttpStatus.notImplemented);
                 res.json(result);

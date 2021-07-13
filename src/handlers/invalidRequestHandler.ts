@@ -12,7 +12,7 @@ class InvalidRequestHandler {
             debug('Handling invalid request');
 
             const result: Result = new Result(ResultStatus.WARNING, {
-                message: res.lang(messageKey),
+                message: res.lang ? res.lang(messageKey) : 'Invalid request',
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 errors_validation: errors?.map((error: any): string => error.message)
             });

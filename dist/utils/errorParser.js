@@ -11,13 +11,17 @@ class ErrorParser {
         let message;
         switch (error) {
             case 'OUT_OF_DIMENSION': {
-                message = res.lang('invalidDimensions')
-                    .replace(':width', config.rules.width)
-                    .replace(':height', config.rules.height);
+                message = res.lang
+                    ? res.lang('invalidDimensions')
+                        .replace(':width', config.rules.width)
+                        .replace(':height', config.rules.height)
+                    : 'Out of dimension';
                 break;
             }
             case 'INVALID_MODE': {
-                message = res.lang('invalidColorMode');
+                message = res.lang
+                    ? res.lang('invalidColorMode')
+                    : 'Invalid color mode';
                 break;
             }
         }
@@ -30,17 +34,23 @@ class ErrorParser {
         let message;
         switch (error) {
             case 'EMPTY_FILE': {
-                message = res.lang('imageFileNotSent');
+                message = res.lang
+                    ? res.lang('imageFileNotSent')
+                    : 'File not sent';
                 break;
             }
             case 'FILE_TOO_LARGE': {
-                message = res.lang('fileSizeExceeded').replace(':size', config.rules.sizeInKBytes < node_util_module_1.default.kbyteToMByteConv
-                    ? `${config.rules.sizeInKBytes}Kb`
-                    : (Math.round(config.rules.sizeInKBytes / node_util_module_1.default.kbyteToMByteConv)) + 'Mb');
+                message = res.lang
+                    ? res.lang('fileSizeExceeded').replace(':size', config.rules.sizeInKBytes < node_util_module_1.default.kbyteToMByteConv
+                        ? `${config.rules.sizeInKBytes}Kb`
+                        : (Math.round(config.rules.sizeInKBytes / node_util_module_1.default.kbyteToMByteConv)) + 'Mb')
+                    : 'File too large';
                 break;
             }
             case 'INVALID_EXTENSION': {
-                message = res.lang('invalidExtension').replace(':extensions', config.rules.ext.join(', '));
+                message = res.lang
+                    ? res.lang('invalidExtension').replace(':extensions', config.rules.ext.join(', '))
+                    : 'Invalid extension';
                 break;
             }
         }

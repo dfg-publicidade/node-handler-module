@@ -33,7 +33,7 @@ class ErrorHandler {
             debug('Handling request error');
             const status = node_result_module_1.HttpStatus.internalError;
             const result = new node_result_module_1.default(node_result_module_1.ResultStatus.ERROR, {
-                message: res.lang(errorMessageKey),
+                message: res.lang ? res.lang(errorMessageKey) : 'An error has occurred',
                 error: error.message
             });
             res.status(status);
