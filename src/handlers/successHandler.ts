@@ -1,4 +1,5 @@
 import App from '@dfgpublicidade/node-app-module';
+import Paginate from '@dfgpublicidade/node-pagination-module';
 import Result, { HttpStatus, ResultStatus } from '@dfgpublicidade/node-result-module';
 import Strings from '@dfgpublicidade/node-strings-module';
 import appDebugger from 'debug';
@@ -8,16 +9,18 @@ import { NextFunction, Request, Response } from 'express';
 const debug: appDebugger.IDebugger = appDebugger('module:success-handler');
 
 class SuccessHandler {
-    public static handle(app: App, content: any, status?: number, options?: {
+    public static handle(app: App, content: any, options?: {
+        status?: number;
         contentType?: string;
         contentDisposition?: 'inline' | 'attachment';
         filename?: string;
         ext?: string;
+        paginate?: Paginate;
     }): (req: Request, res: Response, next?: NextFunction) => Promise<void> {
         return async (req: Request, res: Response, next?: NextFunction): Promise<any> => {
             debug('Handling sucess');
 
-            res.status(status ? status : HttpStatus.success);
+            res.status(options?.status ? options.status : HttpStatus.success);
 
             if (options?.contentDisposition) {
                 switch (options.contentDisposition) {
@@ -44,6 +47,11 @@ class SuccessHandler {
             }
             else {
                 const result: Result = new Result(ResultStatus.SUCCESS, content);
+
+                if (options?.paginate && content?.total) {
+                    options.paginate.setData(result, content.total);
+                }
+
                 res.json(result);
             }
         };

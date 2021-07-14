@@ -120,7 +120,7 @@ describe('errorHandler.ts', (): void => {
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('error');
         expect(res.body).to.have.property('content');
-        expect(res.body.content).to.have.property('message').eq('An error has ocurred');
+        expect(res.body.content).to.have.property('message').eq('An error has occurred');
         expect(res.body.content).to.have.property('error').eq('Test error');
 
         const log: any = await db.collection(errorCollection).findOne({});
@@ -149,14 +149,14 @@ describe('errorHandler.ts', (): void => {
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('error');
         expect(res.body).to.have.property('content');
-        expect(res.body.content).to.have.property('message').eq('erroInterno');
+        expect(res.body.content).to.have.property('message').eq('internalError');
         expect(res.body.content).to.have.property('error').eq('Test error');
 
         const log: any = await db.collection(errorCollection).findOne({});
 
         expect(log).exist.and.have.property('app');
         expect(log).exist.and.have.property('request');
-        expect(log).exist.and.have.property('action').eq('/error');
+        expect(log).exist.and.have.property('action').eq('/error/lang');
         expect(log).exist.and.have.property('method').eq('GET');
         expect(log).exist.and.have.property('ip');
         expect(log).exist.and.have.property('content')

@@ -196,7 +196,7 @@ describe('notFoundHandler.ts', (): void => {
 
         expect(log).exist.and.have.property('app');
         expect(log).exist.and.have.property('request');
-        expect(log).exist.and.have.property('action').eq('/id');
+        expect(log).exist.and.have.property('action').eq('/id/lang');
         expect(log).exist.and.have.property('method').eq('GET');
         expect(log).exist.and.have.property('ip');
         expect(log).exist.and.have.property('content')

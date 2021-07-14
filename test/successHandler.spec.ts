@@ -1,4 +1,5 @@
 import App from '@dfgpublicidade/node-app-module';
+import Paginate from '@dfgpublicidade/node-pagination-module';
 import { HttpStatus } from '@dfgpublicidade/node-result-module';
 import chai, { expect } from 'chai';
 import express, { Express, NextFunction, Request, Response } from 'express';
@@ -33,6 +34,9 @@ describe('successHandler.ts', (): void => {
             config: {
                 api: {
                     allowedHeaders: ''
+                },
+                pagination: {
+                    limit: 20
                 }
             }
         });
@@ -55,22 +59,42 @@ describe('successHandler.ts', (): void => {
 
         exp.get('/created', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             // eslint-disable-next-line no-magic-numbers
-            SuccessHandler.handle(app, { message: 'criado' }, HttpStatus.created)(req, res, next)
+            SuccessHandler.handle(app, { message: 'criado' }, { status: HttpStatus.created })(req, res, next)
         );
 
         exp.get('/success', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
             SuccessHandler.handle(app, { message: 'sucesso' })(req, res, next)
         );
 
+        exp.get('/paginated', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const paginate: Paginate = new Paginate(app, {});
+
+            if (req.query.empty) {
+                return SuccessHandler.handle(app, undefined, {
+                    paginate
+                })(req, res, next);
+            }
+            else if (req.query.total) {
+                return SuccessHandler.handle(app, { items: ['test', 'test2'] }, {
+                    paginate
+                })(req, res, next);
+            }
+            else {
+                return SuccessHandler.handle(app, { total: 2, items: ['test', 'test2'] }, {
+                    paginate
+                })(req, res, next);
+            }
+        });
+
         exp.get('/success-file', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            SuccessHandler.handle(app, 'sucesso', HttpStatus.success, {
+            SuccessHandler.handle(app, 'sucesso', {
                 contentType: 'text/plain',
                 contentDisposition: 'inline'
             })(req, res, next)
         );
 
         exp.get('/success-file-2', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            SuccessHandler.handle(app, 'sucesso', HttpStatus.success, {
+            SuccessHandler.handle(app, 'sucesso', {
                 contentType: 'text/plain',
                 contentDisposition: 'attachment',
                 filename: 'text',
@@ -79,12 +103,11 @@ describe('successHandler.ts', (): void => {
         );
 
         exp.get('/success-file-3', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            SuccessHandler.handle(app, 'sucesso', HttpStatus.success, {
+            SuccessHandler.handle(app, 'sucesso', {
                 contentType: 'text/plain',
                 contentDisposition: 'attachment'
             })(req, res, next)
         );
-
 
         return new Promise<void>((
             resolve: () => void
@@ -128,6 +151,54 @@ describe('successHandler.ts', (): void => {
     });
 
     it('3. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/paginated');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('total').eq(2);
+        expect(res.body.content).to.have.property('items').deep.eq(['test', 'test2']);
+        expect(res.body.content).to.have.property('pages').eq(1);
+        // eslint-disable-next-line no-magic-numbers
+        expect(res.body.content).to.have.property('itemsPerPage').eq(20);
+        expect(res.body.content).to.have.property('currentPage').eq(1);
+    });
+
+    it('4. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/paginated').query({
+            total: true
+        });
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.not.have.property('total');
+        expect(res.body.content).to.have.property('items').deep.eq(['test', 'test2']);
+        expect(res.body.content).to.not.have.property('pages');
+        expect(res.body.content).to.not.have.property('itemsPerPage');
+        expect(res.body.content).to.not.have.property('currentPage');
+    });
+
+    it('5. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/paginated').query({
+            empty: true
+        });
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(res.body).to.not.have.property('content');
+    });
+
+    it('6. SuccessHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-file');
 
         // eslint-disable-next-line no-magic-numbers
@@ -138,7 +209,7 @@ describe('successHandler.ts', (): void => {
         expect(res.text).to.be.eq('sucesso');
     });
 
-    it('4. SuccessHandler', async (): Promise<void> => {
+    it('7. SuccessHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-file-2');
 
         // eslint-disable-next-line no-magic-numbers
@@ -149,7 +220,7 @@ describe('successHandler.ts', (): void => {
         expect(res.text).to.be.eq('sucesso');
     });
 
-    it('5. SuccessHandler', async (): Promise<void> => {
+    it('8. SuccessHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-file-3');
 
         // eslint-disable-next-line no-magic-numbers

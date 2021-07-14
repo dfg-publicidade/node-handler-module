@@ -28,10 +28,10 @@ const debug_1 = __importDefault(require("debug"));
 /* Module */
 const debug = debug_1.default('module:success-handler');
 class SuccessHandler {
-    static handle(app, content, status, options) {
+    static handle(app, content, options) {
         return async (req, res, next) => {
             debug('Handling sucess');
-            res.status(status ? status : node_result_module_1.HttpStatus.success);
+            res.status((options === null || options === void 0 ? void 0 : options.status) ? options.status : node_result_module_1.HttpStatus.success);
             if (options === null || options === void 0 ? void 0 : options.contentDisposition) {
                 switch (options.contentDisposition) {
                     case 'inline': {
@@ -54,6 +54,9 @@ class SuccessHandler {
             }
             else {
                 const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, content);
+                if ((options === null || options === void 0 ? void 0 : options.paginate) && (content === null || content === void 0 ? void 0 : content.total)) {
+                    options.paginate.setData(result, content.total);
+                }
                 res.json(result);
             }
         };

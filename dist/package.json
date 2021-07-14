@@ -13,6 +13,7 @@
     "dependencies": {
         "@dfgpublicidade/node-app-module": "git+https://github.com/dfg-publicidade/node-app-module.git",
         "@dfgpublicidade/node-log-module": "git+ssh://git@github.com/dfg-publicidade/node-log-module.git",
+        "@dfgpublicidade/node-pagination-module": "git+ssh://git@github.com/dfg-publicidade/node-pagination-module.git",
         "@dfgpublicidade/node-result-module": "git+ssh://git@github.com/dfg-publicidade/node-result-module.git",
         "@dfgpublicidade/node-strings-module": "git+ssh://git@github.com/dfg-publicidade/node-strings-module.git",
         "@dfgpublicidade/node-upload-module": "git+ssh://git@github.com/dfg-publicidade/node-upload-module.git",
