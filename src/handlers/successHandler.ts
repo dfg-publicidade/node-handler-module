@@ -49,8 +49,13 @@ class SuccessHandler {
             else {
                 const result: Result = new Result(ResultStatus.SUCCESS, content);
 
-                if (options?.transform && content?.items && Array.isArray(content.items)) {
-                    content.items = content.items.map((item: any): any => options.transform(item));
+                if (options?.transform && content) {
+                    if (content.items && Array.isArray(content.items)) {
+                        content.items = content.items.map((item: any): any => options.transform(item));
+                    }
+                    else {
+                        content = options.transform(content);
+                    }
                 }
 
                 if (options?.paginate && content?.total) {

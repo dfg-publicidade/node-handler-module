@@ -122,6 +122,12 @@ describe('successHandler.ts', (): void => {
             }
         });
 
+        exp.get('/success-transform-entity', async (req: Request, res: Response, next: NextFunction): Promise<void> => SuccessHandler.handle(app, { name: 'Test' }, {
+            transform: (item: any): any => {
+                item.name = item.name.toLowerCase();
+            }
+        })(req, res, next));
+
         return new Promise<void>((
             resolve: () => void
         ): void => {
@@ -267,5 +273,17 @@ describe('successHandler.ts', (): void => {
         expect(res.body).to.have.property('status').eq('success');
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('items').deep.eq(['test', 'test2']);
+    });
+
+    it('11. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-transform-entity');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(res.body).to.have.property('content');
+        expect(res.body.content).to.have.property('name').eq('test');
     });
 });
