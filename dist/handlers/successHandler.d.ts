@@ -9,6 +9,7 @@ declare class SuccessHandler {
         filename?: string;
         ext?: string;
         paginate?: Paginate;
+        transform?: (item: any) => any;
     }): (req: Request, res: Response, next?: NextFunction) => Promise<void>;
 }
 export default SuccessHandler;

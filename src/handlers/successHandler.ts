@@ -16,6 +16,7 @@ class SuccessHandler {
         filename?: string;
         ext?: string;
         paginate?: Paginate;
+        transform?: (item: any) => any;
     }): (req: Request, res: Response, next?: NextFunction) => Promise<void> {
         return async (req: Request, res: Response, next?: NextFunction): Promise<any> => {
             debug('Handling sucess');
@@ -47,6 +48,10 @@ class SuccessHandler {
             }
             else {
                 const result: Result = new Result(ResultStatus.SUCCESS, content);
+
+                if (options?.transform && content?.items && Array.isArray(content.items)) {
+                    content.items = content.items.map((item: any): any => options.transform(item));
+                }
 
                 if (options?.paginate && content?.total) {
                     options.paginate.setData(result, content.total);

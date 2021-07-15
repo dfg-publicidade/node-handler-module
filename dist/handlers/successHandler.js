@@ -54,6 +54,9 @@ class SuccessHandler {
             }
             else {
                 const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, content);
+                if ((options === null || options === void 0 ? void 0 : options.transform) && (content === null || content === void 0 ? void 0 : content.items) && Array.isArray(content.items)) {
+                    content.items = content.items.map((item) => options.transform(item));
+                }
                 if ((options === null || options === void 0 ? void 0 : options.paginate) && (content === null || content === void 0 ? void 0 : content.total)) {
                     options.paginate.setData(result, content.total);
                 }
