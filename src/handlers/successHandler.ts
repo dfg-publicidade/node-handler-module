@@ -1,4 +1,6 @@
 import App from '@dfgpublicidade/node-app-module';
+import Cache, { CacheLevel } from '@dfgpublicidade/node-cache-module';
+import Log from '@dfgpublicidade/node-log-module';
 import Paginate from '@dfgpublicidade/node-pagination-module';
 import Result, { HttpStatus, ResultStatus } from '@dfgpublicidade/node-result-module';
 import Strings from '@dfgpublicidade/node-strings-module';
@@ -17,6 +19,8 @@ class SuccessHandler {
         ext?: string;
         paginate?: Paginate;
         transform?: (item: any) => any;
+        flush?: CacheLevel[];
+        log?: boolean;
     }): (req: Request, res: Response, next?: NextFunction) => Promise<void> {
         return async (req: Request, res: Response, next?: NextFunction): Promise<any> => {
             debug('Handling sucess');
@@ -63,6 +67,18 @@ class SuccessHandler {
                 }
 
                 res.json(result);
+
+                if (options?.flush) {
+                    for (const level of options.flush) {
+                        Cache.flush(level);
+                    }
+                }
+
+                if (options?.log && content && (content.id || content._id)) {
+                    await Log.emit(app, req, app.config.log.collections.activity, {
+                        ref: content.id || content._id.toHexString()
+                    });
+                }
             }
         };
     }

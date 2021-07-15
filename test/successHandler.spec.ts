@@ -1,4 +1,5 @@
 import App from '@dfgpublicidade/node-app-module';
+import Cache, { CacheLevel } from '@dfgpublicidade/node-cache-module';
 import Paginate from '@dfgpublicidade/node-pagination-module';
 import { HttpStatus } from '@dfgpublicidade/node-result-module';
 import chai, { expect } from 'chai';
@@ -6,6 +7,7 @@ import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
 import i18n from 'i18n';
 import { after, before, describe, it } from 'mocha';
+import { Db, MongoClient, ObjectId } from 'mongodb';
 import { SuccessHandler } from '../src';
 
 import ChaiHttp = require('chai-http');
@@ -17,6 +19,10 @@ describe('successHandler.ts', (): void => {
     let app: App;
     let exp: Express;
     let httpServer: http.Server;
+    let client: MongoClient;
+    let db: Db;
+
+    const activityCollection: string = 'activity_col';
 
     before(async (): Promise<void> => {
         exp = express();
@@ -25,6 +31,18 @@ describe('successHandler.ts', (): void => {
         exp.set('port', port);
 
         httpServer = http.createServer(exp);
+
+        if (!process.env.MONGO_TEST_URL) {
+            throw new Error('MONGO_TEST_URL must be set.');
+        }
+
+        client = await MongoClient.connect(process.env.MONGO_TEST_URL, {
+            poolSize: 1,
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+
+        db = client.db();
 
         app = new App({
             appInfo: {
@@ -37,9 +55,16 @@ describe('successHandler.ts', (): void => {
                 },
                 pagination: {
                     limit: 20
+                },
+                log: {
+                    collections: {
+                        activity: activityCollection
+                    }
                 }
             }
         });
+
+        app.add('db', db);
 
         i18n.configure({
             defaultLocale: 'pt-BR',
@@ -128,6 +153,27 @@ describe('successHandler.ts', (): void => {
             }
         })(req, res, next));
 
+        exp.get('/success-cache-flush', async (req: Request, res: Response, next: NextFunction): Promise<void> => SuccessHandler.handle(app, { name: 'Test' }, {
+            flush: [CacheLevel.L1]
+        })(req, res, next));
+
+        exp.get('/success-log', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            if (req.query.empty) {
+                return SuccessHandler.handle(app, undefined, {
+                    log: true
+                })(req, res, next);
+            }
+            else {
+                return SuccessHandler.handle(app, { id: 1 }, {
+                    log: true
+                })(req, res, next);
+            }
+        });
+
+        exp.get('/success-log-2', async (req: Request, res: Response, next: NextFunction): Promise<void> => SuccessHandler.handle(app, { _id: new ObjectId() }, {
+            log: true
+        })(req, res, next));
+
         return new Promise<void>((
             resolve: () => void
         ): void => {
@@ -137,13 +183,22 @@ describe('successHandler.ts', (): void => {
         });
     });
 
-    after(async (): Promise<void> => new Promise<void>((
-        resolve: () => void
-    ): void => {
-        httpServer.close((): void => {
-            resolve();
+    after(async (): Promise<void> => {
+        try {
+            await db.collection(activityCollection).drop();
+        }
+        catch (error: any) {
+            //
+        }
+
+        return new Promise<void>((
+            resolve: () => void
+        ): void => {
+            httpServer.close((): void => {
+                resolve();
+            });
         });
-    }));
+    });
 
     it('1. SuccessHandler', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/created');
@@ -285,5 +340,87 @@ describe('successHandler.ts', (): void => {
         expect(res.body).to.have.property('status').eq('success');
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('name').eq('test');
+    });
+
+    it('12. SuccessHandler', async (): Promise<void> => {
+        const flushed: CacheLevel[] = [];
+
+        const flush: any = Cache.flush;
+        Cache.flush = async (level: CacheLevel): Promise<void[]> => {
+            flushed.push(level);
+            return Promise.resolve([]);
+        };
+
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-cache-flush');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(flushed).to.be.deep.eq([CacheLevel.L1]);
+
+        Cache.flush = flush;
+    });
+
+    it('13. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-log');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(res.body.content).to.have.property('id').eq(1);
+
+        const log: any = await db.collection(activityCollection).findOne({});
+
+        expect(log).exist.and.have.property('app');
+        expect(log).exist.and.have.property('request');
+        expect(log).exist.and.have.property('action').eq('/success-log');
+        expect(log).exist.and.have.property('method').eq('GET');
+        expect(log).exist.and.have.property('ip');
+        expect(log).exist.and.have.property('content')
+            .which.have.property('ref').eq(1);
+        expect(log).exist.and.have.property('time');
+
+        await db.collection(activityCollection).drop();
+    });
+
+    it('14. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-log').query({
+            empty: true
+        });
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(res.body).to.not.have.property('content');
+    });
+
+    it('15. SuccessHandler', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/success-log-2');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
+        expect(res.body).to.not.be.undefined;
+        expect(res.body).to.have.property('time');
+        expect(res.body).to.have.property('status').eq('success');
+        expect(res.body.content).to.have.property('_id').to.exist;
+
+        const log: any = await db.collection(activityCollection).findOne({});
+
+        expect(log).exist.and.have.property('app');
+        expect(log).exist.and.have.property('request');
+        expect(log).exist.and.have.property('action').eq('/success-log');
+        expect(log).exist.and.have.property('method').eq('GET');
+        expect(log).exist.and.have.property('ip');
+        expect(log).exist.and.have.property('content')
+            .which.have.property('ref').to.exist;
+        expect(log).exist.and.have.property('time');
+
+        await db.collection(activityCollection).drop();
     });
 });

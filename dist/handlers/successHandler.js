@@ -22,6 +22,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const node_cache_module_1 = __importDefault(require("@dfgpublicidade/node-cache-module"));
+const node_log_module_1 = __importDefault(require("@dfgpublicidade/node-log-module"));
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
 const node_strings_module_1 = __importDefault(require("@dfgpublicidade/node-strings-module"));
 const debug_1 = __importDefault(require("debug"));
@@ -66,6 +68,16 @@ class SuccessHandler {
                     options.paginate.setData(result, content.total);
                 }
                 res.json(result);
+                if (options === null || options === void 0 ? void 0 : options.flush) {
+                    for (const level of options.flush) {
+                        node_cache_module_1.default.flush(level);
+                    }
+                }
+                if ((options === null || options === void 0 ? void 0 : options.log) && content && (content.id || content._id)) {
+                    await node_log_module_1.default.emit(app, req, app.config.log.collections.activity, {
+                        ref: content.id || content._id.toHexString()
+                    });
+                }
             }
         };
     }

@@ -1,4 +1,5 @@
 import App from '@dfgpublicidade/node-app-module';
+import { CacheLevel } from '@dfgpublicidade/node-cache-module';
 import Paginate from '@dfgpublicidade/node-pagination-module';
 import { NextFunction, Request, Response } from 'express';
 declare class SuccessHandler {
@@ -10,6 +11,8 @@ declare class SuccessHandler {
         ext?: string;
         paginate?: Paginate;
         transform?: (item: any) => any;
+        flush?: CacheLevel[];
+        log?: boolean;
     }): (req: Request, res: Response, next?: NextFunction) => Promise<void>;
 }
 export default SuccessHandler;
