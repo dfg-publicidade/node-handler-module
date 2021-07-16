@@ -51,8 +51,6 @@ class SuccessHandler {
                 res.end();
             }
             else {
-                const result: Result = new Result(ResultStatus.SUCCESS, content);
-
                 if (options?.transform && content) {
                     if (content.items && Array.isArray(content.items)) {
                         content.items = content.items.map((item: any): any => options.transform(item));
@@ -61,6 +59,8 @@ class SuccessHandler {
                         content = options.transform(content);
                     }
                 }
+
+                const result: Result = new Result(ResultStatus.SUCCESS, content);
 
                 if (options?.paginate && content) {
                     options.paginate.setData(result, content.total || 0);
