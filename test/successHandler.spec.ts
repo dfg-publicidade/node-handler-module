@@ -254,9 +254,10 @@ describe('successHandler.ts', (): void => {
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.not.have.property('total');
         expect(res.body.content).to.have.property('items').deep.eq(['test', 'test2']);
-        expect(res.body.content).to.not.have.property('pages');
-        expect(res.body.content).to.not.have.property('itemsPerPage');
-        expect(res.body.content).to.not.have.property('currentPage');
+        expect(res.body.content).to.have.property('pages').eq(0);
+        // eslint-disable-next-line no-magic-numbers
+        expect(res.body.content).to.have.property('itemsPerPage').eq(20);
+        expect(res.body.content).to.have.property('currentPage').eq(1);
     });
 
     it('5. SuccessHandler', async (): Promise<void> => {
@@ -414,7 +415,7 @@ describe('successHandler.ts', (): void => {
 
         expect(log).exist.and.have.property('app');
         expect(log).exist.and.have.property('request');
-        expect(log).exist.and.have.property('action').eq('/success-log');
+        expect(log).exist.and.have.property('action').eq('/success-log-2');
         expect(log).exist.and.have.property('method').eq('GET');
         expect(log).exist.and.have.property('ip');
         expect(log).exist.and.have.property('content')

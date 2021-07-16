@@ -64,8 +64,8 @@ class SuccessHandler {
                         content = options.transform(content);
                     }
                 }
-                if ((options === null || options === void 0 ? void 0 : options.paginate) && (content === null || content === void 0 ? void 0 : content.total)) {
-                    options.paginate.setData(result, content.total);
+                if ((options === null || options === void 0 ? void 0 : options.paginate) && content) {
+                    options.paginate.setData(result, content.total || 0);
                 }
                 res.json(result);
                 if (options === null || options === void 0 ? void 0 : options.flush) {

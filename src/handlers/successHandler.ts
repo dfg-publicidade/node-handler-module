@@ -62,8 +62,8 @@ class SuccessHandler {
                     }
                 }
 
-                if (options?.paginate && content?.total) {
-                    options.paginate.setData(result, content.total);
+                if (options?.paginate && content) {
+                    options.paginate.setData(result, content.total || 0);
                 }
 
                 res.json(result);
