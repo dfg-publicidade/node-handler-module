@@ -1,10 +1,10 @@
-import { ImageUploadError, UploadError } from '@dfgpublicidade/node-upload-module';
+import { FileUpload, ImageUpload, ImageUploadError, UploadError } from '@dfgpublicidade/node-upload-module';
 import Util from '@dfgpublicidade/node-util-module';
 import { Response } from 'express';
 
 /* Module */
 class ErrorParser {
-    public static parseImageUploadError(res: Response, error: ImageUploadError, config: any): {
+    public static parseImageUploadError(res: Response, upload: ImageUpload, error: ImageUploadError): {
         code: string;
         message: string;
     } {
@@ -15,8 +15,8 @@ class ErrorParser {
             case 'OUT_OF_DIMENSION': {
                 message = res.lang
                     ? res.lang('invalidDimensions')
-                        .replace(':width', config.rules.width)
-                        .replace(':height', config.rules.height)
+                        .replace(':width', upload.getDefaultWidth().toString())
+                        .replace(':height', upload.getDefaultHeight().toString())
                     : 'Out of dimension';
 
                 break;
@@ -35,7 +35,7 @@ class ErrorParser {
         };
     }
 
-    public static parseUploadError(res: Response, error: UploadError, config: any): {
+    public static parseUploadError(res: Response, upload: FileUpload, error: UploadError): {
         code: string;
         message: string;
     } {
@@ -53,9 +53,9 @@ class ErrorParser {
             case 'FILE_TOO_LARGE': {
                 message = res.lang
                     ? res.lang('fileSizeExceeded').replace(':size',
-                        config.rules.sizeInKBytes < Util.kbyteToMByteConv
-                            ? `${config.rules.sizeInKBytes}Kb`
-                            : (Math.round(config.rules.sizeInKBytes / Util.kbyteToMByteConv)) + 'Mb'
+                        upload.getMaxSizeInKBytes() < Util.kbyteToMByteConv
+                            ? `${upload.getMaxSizeInKBytes()}Kb`
+                            : (Math.round(upload.getMaxSizeInKBytes() / Util.kbyteToMByteConv)) + 'Mb'
                     )
                     : 'File too large';
 
@@ -63,7 +63,7 @@ class ErrorParser {
             }
             case 'INVALID_EXTENSION': {
                 message = res.lang
-                    ? res.lang('invalidExtension').replace(':extensions', config.rules.ext.join(', '))
+                    ? res.lang('invalidExtension').replace(':extensions', upload.getAcceptedExt().join(', '))
                     : 'Invalid extension';
 
                 break;

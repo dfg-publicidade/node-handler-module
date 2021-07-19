@@ -1,4 +1,5 @@
 import App from '@dfgpublicidade/node-app-module';
+import { FileUpload, ImageUpload } from '@dfgpublicidade/node-upload-module';
 import chai, { expect } from 'chai';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
@@ -49,90 +50,145 @@ describe('invalidUploadHandler.ts', (): void => {
             }
         });
 
-        exp.post('/empty-file', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'EMPTY_FILE', {})(req, res, next)
-        );
+        exp.post('/empty-file', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: FileUpload = new FileUpload(app.config, {
+                name: '',
+                prefix: '',
+                rules: {}
+            });
 
-        exp.post('/file-too-large', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'FILE_TOO_LARGE', {
+            return InvalidUploadHandler.handle(app, upload, 'EMPTY_FILE')(req, res, next);
+        });
+
+        exp.post('/file-too-large', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: FileUpload = new FileUpload(app.config, {
+                name: '',
+                prefix: '',
                 rules: {
                     sizeInKBytes: 100
                 }
-            })(req, res, next)
-        );
+            });
 
-        exp.post('/file-too-large-2', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'FILE_TOO_LARGE', {
+            return InvalidUploadHandler.handle(app, upload, 'FILE_TOO_LARGE')(req, res, next);
+        });
+
+        exp.post('/file-too-large-2', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: FileUpload = new FileUpload(app.config, {
+                name: '',
+                prefix: '',
                 rules: {
                     sizeInKBytes: 5000
                 }
-            })(req, res, next)
-        );
+            });
 
-        exp.post('/invalid-extension', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'INVALID_EXTENSION', {
+            return InvalidUploadHandler.handle(app, upload, 'FILE_TOO_LARGE')(req, res, next);
+        });
+
+        exp.post('/invalid-extension', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: FileUpload = new FileUpload(app.config, {
+                name: '',
+                prefix: '',
                 rules: {
                     ext: ['.doc', '.docx', '.pdf']
                 }
-            })(req, res, next)
-        );
+            });
 
-        exp.post('/out-of-dimension', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'OUT_OF_DIMENSION', {
+            return InvalidUploadHandler.handle(app, upload, 'INVALID_EXTENSION')(req, res, next);
+        });
+
+        exp.post('/out-of-dimension', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: ImageUpload = new ImageUpload(app.config, {
+                name: '',
+                prefix: '',
                 rules: {
                     width: 150,
                     height: 150
                 }
-            })(req, res, next)
-        );
+            });
 
-        exp.post('/invalid-mode', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'INVALID_MODE', {})(req, res, next)
-        );
+            return InvalidUploadHandler.handle(app, upload, 'OUT_OF_DIMENSION')(req, res, next);
+        });
 
+        exp.post('/invalid-mode', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: ImageUpload = new ImageUpload(app.config, {
+                name: '',
+                prefix: '',
+                rules: {}
+            });
+
+            return InvalidUploadHandler.handle(app, upload, 'INVALID_MODE')(req, res, next);
+        });
 
         exp.use(i18n.init);
 
-        exp.post('/empty-file/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'EMPTY_FILE', {})(req, res, next)
-        );
+        exp.post('/empty-file/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: FileUpload = new FileUpload(app.config, {
+                name: '',
+                prefix: '',
+                rules: {}
+            });
 
-        exp.post('/file-too-large/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'FILE_TOO_LARGE', {
+            return InvalidUploadHandler.handle(app, upload, 'EMPTY_FILE')(req, res, next);
+        });
+
+        exp.post('/file-too-large/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: FileUpload = new FileUpload(app.config, {
+                name: '',
+                prefix: '',
                 rules: {
                     sizeInKBytes: 100
                 }
-            })(req, res, next)
-        );
+            });
 
-        exp.post('/file-too-large-2/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'FILE_TOO_LARGE', {
+            return InvalidUploadHandler.handle(app, upload, 'FILE_TOO_LARGE')(req, res, next);
+        });
+
+        exp.post('/file-too-large-2/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: FileUpload = new FileUpload(app.config, {
+                name: '',
+                prefix: '',
                 rules: {
                     sizeInKBytes: 5000
                 }
-            })(req, res, next)
-        );
+            });
 
-        exp.post('/invalid-extension/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'INVALID_EXTENSION', {
+            return InvalidUploadHandler.handle(app, upload, 'FILE_TOO_LARGE')(req, res, next);
+        });
+
+        exp.post('/invalid-extension/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: FileUpload = new FileUpload(app.config, {
+                name: '',
+                prefix: '',
                 rules: {
                     ext: ['.doc', '.docx', '.pdf']
                 }
-            })(req, res, next)
-        );
+            });
 
-        exp.post('/out-of-dimension/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'OUT_OF_DIMENSION', {
+            return InvalidUploadHandler.handle(app, upload, 'INVALID_EXTENSION')(req, res, next);
+        });
+
+        exp.post('/out-of-dimension/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: ImageUpload = new ImageUpload(app.config, {
+                name: '',
+                prefix: '',
                 rules: {
                     width: 150,
                     height: 150
                 }
-            })(req, res, next)
-        );
+            });
 
-        exp.post('/invalid-mode/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> =>
-            InvalidUploadHandler.handle(app, 'INVALID_MODE', {})(req, res, next)
-        );
+            return InvalidUploadHandler.handle(app, upload, 'OUT_OF_DIMENSION')(req, res, next);
+        });
+
+        exp.post('/invalid-mode/lang', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const upload: ImageUpload = new ImageUpload(app.config, {
+                name: '',
+                prefix: '',
+                rules: {}
+            });
+
+            return InvalidUploadHandler.handle(app, upload, 'INVALID_MODE')(req, res, next);
+        });
 
         return new Promise<void>((
             resolve: () => void

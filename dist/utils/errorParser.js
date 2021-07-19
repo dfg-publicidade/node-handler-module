@@ -6,15 +6,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_util_module_1 = __importDefault(require("@dfgpublicidade/node-util-module"));
 /* Module */
 class ErrorParser {
-    static parseImageUploadError(res, error, config) {
+    static parseImageUploadError(res, upload, error) {
         let code;
         let message;
         switch (error) {
             case 'OUT_OF_DIMENSION': {
                 message = res.lang
                     ? res.lang('invalidDimensions')
-                        .replace(':width', config.rules.width)
-                        .replace(':height', config.rules.height)
+                        .replace(':width', upload.getDefaultWidth().toString())
+                        .replace(':height', upload.getDefaultHeight().toString())
                     : 'Out of dimension';
                 break;
             }
@@ -29,7 +29,7 @@ class ErrorParser {
             code, message
         };
     }
-    static parseUploadError(res, error, config) {
+    static parseUploadError(res, upload, error) {
         let code;
         let message;
         switch (error) {
@@ -41,15 +41,15 @@ class ErrorParser {
             }
             case 'FILE_TOO_LARGE': {
                 message = res.lang
-                    ? res.lang('fileSizeExceeded').replace(':size', config.rules.sizeInKBytes < node_util_module_1.default.kbyteToMByteConv
-                        ? `${config.rules.sizeInKBytes}Kb`
-                        : (Math.round(config.rules.sizeInKBytes / node_util_module_1.default.kbyteToMByteConv)) + 'Mb')
+                    ? res.lang('fileSizeExceeded').replace(':size', upload.getMaxSizeInKBytes() < node_util_module_1.default.kbyteToMByteConv
+                        ? `${upload.getMaxSizeInKBytes()}Kb`
+                        : (Math.round(upload.getMaxSizeInKBytes() / node_util_module_1.default.kbyteToMByteConv)) + 'Mb')
                     : 'File too large';
                 break;
             }
             case 'INVALID_EXTENSION': {
                 message = res.lang
-                    ? res.lang('invalidExtension').replace(':extensions', config.rules.ext.join(', '))
+                    ? res.lang('invalidExtension').replace(':extensions', upload.getAcceptedExt().join(', '))
                     : 'Invalid extension';
                 break;
             }

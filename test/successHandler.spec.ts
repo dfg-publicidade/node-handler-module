@@ -150,6 +150,7 @@ describe('successHandler.ts', (): void => {
         exp.get('/success-transform-entity', async (req: Request, res: Response, next: NextFunction): Promise<void> => SuccessHandler.handle(app, { name: 'Test' }, {
             transform: (item: any): any => {
                 item.name = item.name.toLowerCase();
+                return item;
             }
         })(req, res, next));
 
@@ -340,6 +341,7 @@ describe('successHandler.ts', (): void => {
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('success');
         expect(res.body).to.have.property('content');
+
         expect(res.body.content).to.have.property('name').eq('test');
     });
 
