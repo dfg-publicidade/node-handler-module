@@ -32,7 +32,7 @@ const debug = debug_1.default('module:success-handler');
 class SuccessHandler {
     static handle(app, content, options) {
         return async (req, res, next) => {
-            debug('Handling sucess');
+            debug('Handling success');
             res.status((options === null || options === void 0 ? void 0 : options.status) ? options.status : node_result_module_1.HttpStatus.success);
             if (options === null || options === void 0 ? void 0 : options.contentDisposition) {
                 switch (options.contentDisposition) {

@@ -23,7 +23,7 @@ class SuccessHandler {
         log?: boolean;
     }): (req: Request, res: Response, next?: NextFunction) => Promise<void> {
         return async (req: Request, res: Response, next?: NextFunction): Promise<any> => {
-            debug('Handling sucess');
+            debug('Handling success');
 
             res.status(options?.status ? options.status : HttpStatus.success);
 
