@@ -30,22 +30,27 @@ const debug = debug_1.default('module:nofound-handler');
 class NotFoundHandler {
     static handle(app, messageKey, status) {
         return async (req, res, next) => {
-            debug(`Handling not found: ${req.originalUrl}`);
-            if (req.method === 'OPTIONS') {
-                res.header('Access-Control-Allow-Methods', '');
-                res.header('Access-Control-Allow-Headers', app.config.api.allowedHeaders);
-                res.end();
+            try {
+                debug(`Handling not found: ${req.originalUrl}`);
+                if (req.method === 'OPTIONS') {
+                    res.header('Access-Control-Allow-Methods', '');
+                    res.header('Access-Control-Allow-Headers', app.config.api.allowedHeaders);
+                    res.end();
+                }
+                else {
+                    const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, {
+                        message: res.lang ? res.lang(messageKey) : 'Not found'
+                    });
+                    res.status(status ? status : node_result_module_1.HttpStatus.notFound);
+                    res.json(result);
+                    await node_log_module_1.default.emit(app, req, app.config.log.collections.notFound, {
+                        code: status ? status : node_result_module_1.HttpStatus.notFound,
+                        error: 'Not found'
+                    });
+                }
             }
-            else {
-                const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, {
-                    message: res.lang ? res.lang(messageKey) : 'Not found'
-                });
-                res.status(status ? status : node_result_module_1.HttpStatus.notFound);
-                res.json(result);
-                await node_log_module_1.default.emit(app, req, app.config.log.collections.notFound, {
-                    code: status ? status : node_result_module_1.HttpStatus.notFound,
-                    error: 'Not found'
-                });
+            catch (error) {
+                next(error);
             }
         };
     }

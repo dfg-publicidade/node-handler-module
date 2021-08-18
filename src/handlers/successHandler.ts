@@ -23,62 +23,67 @@ class SuccessHandler {
         log?: boolean;
     }): (req: Request, res: Response, next?: NextFunction) => Promise<void> {
         return async (req: Request, res: Response, next?: NextFunction): Promise<any> => {
-            debug('Handling success');
+            try {
+                debug('Handling success');
 
-            res.status(options?.status ? options.status : HttpStatus.success);
+                res.status(options?.status ? options.status : HttpStatus.success);
 
-            if (options?.contentDisposition) {
-                switch (options.contentDisposition) {
-                    case 'inline': {
-                        res.header('Content-Disposition', 'inline');
-                        break;
+                if (options?.contentDisposition) {
+                    switch (options.contentDisposition) {
+                        case 'inline': {
+                            res.header('Content-Disposition', 'inline');
+                            break;
+                        }
+                        case 'attachment': {
+                            const filename: string = options.filename
+                                ? `filename="${Strings.toUrl(options.filename)}${options.ext}"`
+                                : '';
+
+                            res.header('Content-Disposition', `attachment; ${filename}`);
+                            break;
+                        }
                     }
-                    case 'attachment': {
-                        const filename: string = options.filename
-                            ? `filename="${Strings.toUrl(options.filename)}${options.ext}"`
-                            : '';
+                }
 
-                        res.header('Content-Disposition', `attachment; ${filename}`);
-                        break;
+                if (options?.contentType) {
+                    res.header('Content-Type', options.contentType);
+
+                    res.write(content);
+                    res.end();
+                }
+                else {
+                    if (options?.transform && content) {
+                        if (content.items && Array.isArray(content.items)) {
+                            content.items = content.items.map((item: any): any => options.transform(item));
+                        }
+                        else {
+                            content = options.transform(content);
+                        }
+                    }
+
+                    const result: Result = new Result(ResultStatus.SUCCESS, content);
+
+                    if (options?.paginate && content) {
+                        options.paginate.setData(result, content.total || 0);
+                    }
+
+                    res.json(result);
+
+                    if (options?.flush) {
+                        for (const level of options.flush) {
+                            Cache.flush(level);
+                        }
+                    }
+
+                    if (options?.log && content && (content.id || content._id)) {
+                        await Log.emit(app, req, app.config.log.collections.activity, {
+                            ref: content.id || content._id.toHexString()
+                        });
                     }
                 }
             }
-
-            if (options?.contentType) {
-                res.header('Content-Type', options.contentType);
-
-                res.write(content);
-                res.end();
-            }
-            else {
-                if (options?.transform && content) {
-                    if (content.items && Array.isArray(content.items)) {
-                        content.items = content.items.map((item: any): any => options.transform(item));
-                    }
-                    else {
-                        content = options.transform(content);
-                    }
-                }
-
-                const result: Result = new Result(ResultStatus.SUCCESS, content);
-
-                if (options?.paginate && content) {
-                    options.paginate.setData(result, content.total || 0);
-                }
-
-                res.json(result);
-
-                if (options?.flush) {
-                    for (const level of options.flush) {
-                        Cache.flush(level);
-                    }
-                }
-
-                if (options?.log && content && (content.id || content._id)) {
-                    await Log.emit(app, req, app.config.log.collections.activity, {
-                        ref: content.id || content._id.toHexString()
-                    });
-                }
+            catch (error: any) {
+                next(error);
             }
         };
     }

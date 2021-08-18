@@ -29,14 +29,19 @@ const debug = debug_1.default('module:invalid-request-handler');
 class InvalidRequestHandler {
     static handle(app, messageKey, errors, status) {
         return async (req, res, next) => {
-            debug('Handling invalid request');
-            const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, {
-                message: res.lang ? res.lang(messageKey) : 'Invalid request',
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                errors_validation: errors === null || errors === void 0 ? void 0 : errors.map((error) => error.message)
-            });
-            res.status(status ? status : node_result_module_1.HttpStatus.badRequest);
-            res.json(result);
+            try {
+                debug('Handling invalid request');
+                const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, {
+                    message: res.lang ? res.lang(messageKey) : 'Invalid request',
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    errors_validation: errors === null || errors === void 0 ? void 0 : errors.map((error) => error.message)
+                });
+                res.status(status ? status : node_result_module_1.HttpStatus.badRequest);
+                res.json(result);
+            }
+            catch (error) {
+                next(error);
+            }
         };
     }
 }

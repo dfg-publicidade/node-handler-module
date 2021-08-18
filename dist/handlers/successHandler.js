@@ -32,52 +32,57 @@ const debug = debug_1.default('module:success-handler');
 class SuccessHandler {
     static handle(app, content, options) {
         return async (req, res, next) => {
-            debug('Handling success');
-            res.status((options === null || options === void 0 ? void 0 : options.status) ? options.status : node_result_module_1.HttpStatus.success);
-            if (options === null || options === void 0 ? void 0 : options.contentDisposition) {
-                switch (options.contentDisposition) {
-                    case 'inline': {
-                        res.header('Content-Disposition', 'inline');
-                        break;
+            try {
+                debug('Handling success');
+                res.status((options === null || options === void 0 ? void 0 : options.status) ? options.status : node_result_module_1.HttpStatus.success);
+                if (options === null || options === void 0 ? void 0 : options.contentDisposition) {
+                    switch (options.contentDisposition) {
+                        case 'inline': {
+                            res.header('Content-Disposition', 'inline');
+                            break;
+                        }
+                        case 'attachment': {
+                            const filename = options.filename
+                                ? `filename="${node_strings_module_1.default.toUrl(options.filename)}${options.ext}"`
+                                : '';
+                            res.header('Content-Disposition', `attachment; ${filename}`);
+                            break;
+                        }
                     }
-                    case 'attachment': {
-                        const filename = options.filename
-                            ? `filename="${node_strings_module_1.default.toUrl(options.filename)}${options.ext}"`
-                            : '';
-                        res.header('Content-Disposition', `attachment; ${filename}`);
-                        break;
+                }
+                if (options === null || options === void 0 ? void 0 : options.contentType) {
+                    res.header('Content-Type', options.contentType);
+                    res.write(content);
+                    res.end();
+                }
+                else {
+                    if ((options === null || options === void 0 ? void 0 : options.transform) && content) {
+                        if (content.items && Array.isArray(content.items)) {
+                            content.items = content.items.map((item) => options.transform(item));
+                        }
+                        else {
+                            content = options.transform(content);
+                        }
+                    }
+                    const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, content);
+                    if ((options === null || options === void 0 ? void 0 : options.paginate) && content) {
+                        options.paginate.setData(result, content.total || 0);
+                    }
+                    res.json(result);
+                    if (options === null || options === void 0 ? void 0 : options.flush) {
+                        for (const level of options.flush) {
+                            node_cache_module_1.default.flush(level);
+                        }
+                    }
+                    if ((options === null || options === void 0 ? void 0 : options.log) && content && (content.id || content._id)) {
+                        await node_log_module_1.default.emit(app, req, app.config.log.collections.activity, {
+                            ref: content.id || content._id.toHexString()
+                        });
                     }
                 }
             }
-            if (options === null || options === void 0 ? void 0 : options.contentType) {
-                res.header('Content-Type', options.contentType);
-                res.write(content);
-                res.end();
-            }
-            else {
-                if ((options === null || options === void 0 ? void 0 : options.transform) && content) {
-                    if (content.items && Array.isArray(content.items)) {
-                        content.items = content.items.map((item) => options.transform(item));
-                    }
-                    else {
-                        content = options.transform(content);
-                    }
-                }
-                const result = new node_result_module_1.default(node_result_module_1.ResultStatus.SUCCESS, content);
-                if ((options === null || options === void 0 ? void 0 : options.paginate) && content) {
-                    options.paginate.setData(result, content.total || 0);
-                }
-                res.json(result);
-                if (options === null || options === void 0 ? void 0 : options.flush) {
-                    for (const level of options.flush) {
-                        node_cache_module_1.default.flush(level);
-                    }
-                }
-                if ((options === null || options === void 0 ? void 0 : options.log) && content && (content.id || content._id)) {
-                    await node_log_module_1.default.emit(app, req, app.config.log.collections.activity, {
-                        ref: content.id || content._id.toHexString()
-                    });
-                }
+            catch (error) {
+                next(error);
             }
         };
     }

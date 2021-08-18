@@ -30,12 +30,17 @@ const debug = debug_1.default('module:invalid-request-handler');
 class InvalidUploadHandler {
     static handle(app, upload, error) {
         return async (req, res, next) => {
-            debug('Handling invalid upload');
-            const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, (error === 'OUT_OF_DIMENSION' || error === 'INVALID_MODE')
-                ? errorParser_1.default.parseImageUploadError(res, upload, error)
-                : errorParser_1.default.parseUploadError(res, upload, error));
-            res.status(node_result_module_1.HttpStatus.badRequest);
-            res.json(result);
+            try {
+                debug('Handling invalid upload');
+                const result = new node_result_module_1.default(node_result_module_1.ResultStatus.WARNING, (error === 'OUT_OF_DIMENSION' || error === 'INVALID_MODE')
+                    ? errorParser_1.default.parseImageUploadError(res, upload, error)
+                    : errorParser_1.default.parseUploadError(res, upload, error));
+                res.status(node_result_module_1.HttpStatus.badRequest);
+                res.json(result);
+            }
+            catch (error) {
+                next(error);
+            }
         };
     }
 }

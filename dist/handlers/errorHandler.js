@@ -30,21 +30,26 @@ const debug = debug_1.default('module:error-handler');
 class ErrorHandler {
     static handle(app) {
         return async (error, req, res, next) => {
-            debug('Handling request error');
-            const status = node_result_module_1.HttpStatus.internalError;
-            const result = new node_result_module_1.default(node_result_module_1.ResultStatus.ERROR, {
-                message: res.lang ? res.lang('internalError') : 'An error has occurred',
-                error: error.message
-            });
-            res.status(status);
-            res.json(result);
-            await node_log_module_1.default.emit(app, req, app.config.log.collections.error, {
-                code: status,
-                errorCode: error.code,
-                error: error.message
-            });
-            // eslint-disable-next-line no-console
-            console.error(error);
+            try {
+                debug('Handling request error');
+                const status = node_result_module_1.HttpStatus.internalError;
+                const result = new node_result_module_1.default(node_result_module_1.ResultStatus.ERROR, {
+                    message: res.lang ? res.lang('internalError') : 'An error has occurred',
+                    error: error.message
+                });
+                res.status(status);
+                res.json(result);
+                await node_log_module_1.default.emit(app, req, app.config.log.collections.error, {
+                    code: status,
+                    errorCode: error.code,
+                    error: error.message
+                });
+                // eslint-disable-next-line no-console
+                console.error(error);
+            }
+            catch (error) {
+                next(error);
+            }
         };
     }
 }
