@@ -72,6 +72,14 @@ describe('invalidRequestHandler.ts', (): void => {
             }], 415)(req, res, next)
         );
 
+        exp.get('/invalid-request/fail', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            res.end();
+
+            InvalidRequestHandler.handle(app, 'dadosInvalidos', [{
+                message: 'Nome não informado'
+            }])(req, res, next);
+        });
+
         return new Promise<void>((
             resolve: () => void
         ): void => {
@@ -89,7 +97,7 @@ describe('invalidRequestHandler.ts', (): void => {
         });
     }));
 
-    it('1. InvalidRequestHandler', async (): Promise<void> => {
+    it('1. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-request');
 
         // eslint-disable-next-line no-magic-numbers
@@ -101,7 +109,7 @@ describe('invalidRequestHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('Invalid request');
     });
 
-    it('2. InvalidRequestHandler', async (): Promise<void> => {
+    it('2. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-request/lang');
 
         // eslint-disable-next-line no-magic-numbers
@@ -113,7 +121,7 @@ describe('invalidRequestHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('dadosInvalidos');
     });
 
-    it('3. InvalidRequestHandler', async (): Promise<void> => {
+    it('3. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-request-message');
 
         // eslint-disable-next-line no-magic-numbers
@@ -128,7 +136,7 @@ describe('invalidRequestHandler.ts', (): void => {
         expect(res.body.content.errors_validation[0]).to.be.eq('Nome não informado');
     });
 
-    it('4. InvalidRequestHandler', async (): Promise<void> => {
+    it('4. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-media');
 
         // eslint-disable-next-line no-magic-numbers
@@ -141,5 +149,12 @@ describe('invalidRequestHandler.ts', (): void => {
 
         expect(res.body.content.errors_validation).to.be.not.empty;
         expect(res.body.content.errors_validation[0]).to.be.eq('Formato de mídia não suportado');
+    });
+
+    it('5. handle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/invalid-request/fail');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
     });
 });

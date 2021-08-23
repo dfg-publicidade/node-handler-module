@@ -86,6 +86,13 @@ describe('notFoundHandler.ts', (): void => {
             NotFoundHandler.handle(app, 'registroNaoEncontrado')(req, res, next)
         );
 
+        exp.get('/id/fail', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            res.end();
+
+            // eslint-disable-next-line no-magic-numbers
+            return NotFoundHandler.handle(app, 'registroNaoEncontrado')(req, res, next);
+        });
+
         exp.use(NotFoundHandler.handle(app, 'recursoInexistente', HttpStatus.notImplemented));
 
         return new Promise<void>((
@@ -115,7 +122,7 @@ describe('notFoundHandler.ts', (): void => {
     });
 
 
-    it('1. NotFoundHandler', async (): Promise<void> => {
+    it('1. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/notfound');
 
         // eslint-disable-next-line no-magic-numbers
@@ -143,7 +150,7 @@ describe('notFoundHandler.ts', (): void => {
         await db.collection(notfoundCollection).drop();
     });
 
-    it('2. NotFoundHandler', async (): Promise<void> => {
+    it('2. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().options('/notfound');
 
         // eslint-disable-next-line no-magic-numbers
@@ -153,7 +160,7 @@ describe('notFoundHandler.ts', (): void => {
         expect(res.header).to.have.property('access-control-allow-headers').eq(app.config.api.allowedHeaders);
     });
 
-    it('3. NotFoundHandler', async (): Promise<void> => {
+    it('3. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/id');
 
         // eslint-disable-next-line no-magic-numbers
@@ -181,7 +188,7 @@ describe('notFoundHandler.ts', (): void => {
         await db.collection(notfoundCollection).drop();
     });
 
-    it('4. NotFoundHandler', async (): Promise<void> => {
+    it('4. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/id/lang');
 
         // eslint-disable-next-line no-magic-numbers
@@ -207,5 +214,12 @@ describe('notFoundHandler.ts', (): void => {
         expect(log).exist.and.have.property('time');
 
         await db.collection(notfoundCollection).drop();
+    });
+
+    it('5. handle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/id/fail');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
     });
 });

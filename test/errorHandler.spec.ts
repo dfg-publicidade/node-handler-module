@@ -83,6 +83,12 @@ describe('errorHandler.ts', (): void => {
             next(new Error('Test error'));
         });
 
+        exp.get('/error/fail', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            res.end();
+
+            next(new Error('Test error'));
+        });
+
         exp.use(ErrorHandler.handle(app));
 
         return new Promise<void>((
@@ -167,5 +173,12 @@ describe('errorHandler.ts', (): void => {
         expect(log).exist.and.have.property('time');
 
         await db.collection(errorCollection).drop();
+    });
+
+    it('3. handle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().get('/error/fail');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
     });
 });

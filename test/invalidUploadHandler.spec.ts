@@ -190,6 +190,18 @@ describe('invalidUploadHandler.ts', (): void => {
             return InvalidUploadHandler.handle(app, upload, 'INVALID_MODE')(req, res, next);
         });
 
+        exp.post('/invalid-mode/fail', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            res.end();
+
+            const upload: ImageUpload = new ImageUpload(app.config, {
+                name: '',
+                prefix: '',
+                rules: {}
+            });
+
+            return InvalidUploadHandler.handle(app, upload, 'INVALID_MODE')(req, res, next);
+        });
+
         return new Promise<void>((
             resolve: () => void
         ): void => {
@@ -207,7 +219,7 @@ describe('invalidUploadHandler.ts', (): void => {
         });
     }));
 
-    it('1. InvalidUploadHandler', async (): Promise<void> => {
+    it('1. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/empty-file');
 
         // eslint-disable-next-line no-magic-numbers
@@ -219,7 +231,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('File not sent');
     });
 
-    it('2. InvalidUploadHandler', async (): Promise<void> => {
+    it('2. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/empty-file/lang');
 
         // eslint-disable-next-line no-magic-numbers
@@ -231,7 +243,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq(i18n.__('fileNotSent'));
     });
 
-    it('3. InvalidUploadHandler', async (): Promise<void> => {
+    it('3. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/file-too-large');
 
         // eslint-disable-next-line no-magic-numbers
@@ -243,7 +255,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('File too large');
     });
 
-    it('4. InvalidUploadHandler', async (): Promise<void> => {
+    it('4. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/file-too-large/lang');
 
         // eslint-disable-next-line no-magic-numbers
@@ -255,7 +267,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq(i18n.__('fileSizeExceeded').replace(':size', '100Kb'));
     });
 
-    it('5. InvalidUploadHandler', async (): Promise<void> => {
+    it('5. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/file-too-large-2/lang');
 
         // eslint-disable-next-line no-magic-numbers
@@ -267,7 +279,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq(i18n.__('fileSizeExceeded').replace(':size', '5Mb'));
     });
 
-    it('6. InvalidUploadHandler', async (): Promise<void> => {
+    it('6. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/invalid-extension');
 
         // eslint-disable-next-line no-magic-numbers
@@ -279,7 +291,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('Invalid extension');
     });
 
-    it('7. InvalidUploadHandler', async (): Promise<void> => {
+    it('7. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/invalid-extension/lang');
 
         // eslint-disable-next-line no-magic-numbers
@@ -291,7 +303,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq(i18n.__('invalidExtension').replace(':extensions', '.doc, .docx, .pdf'));
     });
 
-    it('8. InvalidUploadHandler', async (): Promise<void> => {
+    it('8. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/out-of-dimension');
 
         // eslint-disable-next-line no-magic-numbers
@@ -303,7 +315,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('Out of dimension');
     });
 
-    it('9. InvalidUploadHandler', async (): Promise<void> => {
+    it('9. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/out-of-dimension/lang');
 
         // eslint-disable-next-line no-magic-numbers
@@ -315,7 +327,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq(i18n.__('invalidDimensions').replace(':width', '150').replace(':height', '150'));
     });
 
-    it('10. InvalidUploadHandler', async (): Promise<void> => {
+    it('10. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/invalid-mode');
 
         // eslint-disable-next-line no-magic-numbers
@@ -327,7 +339,7 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('Invalid color mode');
     });
 
-    it('11. InvalidUploadHandler', async (): Promise<void> => {
+    it('11. handle', async (): Promise<void> => {
         const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/invalid-mode/lang');
 
         // eslint-disable-next-line no-magic-numbers
@@ -337,5 +349,12 @@ describe('invalidUploadHandler.ts', (): void => {
         expect(res.body).to.have.property('status').eq('warning');
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('message').eq(i18n.__('invalidColorMode'));
+    });
+
+    it('11. handle', async (): Promise<void> => {
+        const res: ChaiHttp.Response = await chai.request(exp).keepOpen().post('/invalid-mode/fail');
+
+        // eslint-disable-next-line no-magic-numbers
+        expect(res).to.have.status(200);
     });
 });
