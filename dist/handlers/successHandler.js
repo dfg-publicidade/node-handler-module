@@ -28,7 +28,7 @@ const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-m
 const node_strings_module_1 = __importDefault(require("@dfgpublicidade/node-strings-module"));
 const debug_1 = __importDefault(require("debug"));
 /* Module */
-const debug = debug_1.default('module:success-handler');
+const debug = (0, debug_1.default)('module:success-handler');
 class SuccessHandler {
     static handle(app, content, options) {
         return async (req, res, next) => {

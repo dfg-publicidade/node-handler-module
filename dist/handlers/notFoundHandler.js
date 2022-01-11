@@ -26,7 +26,7 @@ const node_log_module_1 = __importDefault(require("@dfgpublicidade/node-log-modu
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
 const debug_1 = __importDefault(require("debug"));
 /* Module */
-const debug = debug_1.default('module:nofound-handler');
+const debug = (0, debug_1.default)('module:nofound-handler');
 class NotFoundHandler {
     static handle(app, messageKey, status) {
         return async (req, res, next) => {

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_util_module_1 = __importDefault(require("@dfgpublicidade/node-util-module"));
 const debug_1 = __importDefault(require("debug"));
 /* Module */
-const debug = debug_1.default('module:servererror-handler');
+const debug = (0, debug_1.default)('module:servererror-handler');
 class ServerErrorHandler {
     static handle(error, port) {
         debug('Handling server error');

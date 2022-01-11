@@ -26,7 +26,7 @@ const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-m
 const debug_1 = __importDefault(require("debug"));
 const errorParser_1 = __importDefault(require("../utils/errorParser"));
 /* Module */
-const debug = debug_1.default('module:invalid-request-handler');
+const debug = (0, debug_1.default)('module:invalid-request-handler');
 class InvalidUploadHandler {
     static handle(app, upload, error) {
         return async (req, res, next) => {

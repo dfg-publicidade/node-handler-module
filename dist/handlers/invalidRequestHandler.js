@@ -25,7 +25,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_result_module_1 = __importStar(require("@dfgpublicidade/node-result-module"));
 const debug_1 = __importDefault(require("debug"));
 /* Module */
-const debug = debug_1.default('module:invalid-request-handler');
+const debug = (0, debug_1.default)('module:invalid-request-handler');
 class InvalidRequestHandler {
     static handle(app, messageKey, errors, status) {
         return async (req, res, next) => {
