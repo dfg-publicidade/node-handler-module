@@ -33,11 +33,7 @@ describe('errorHandler.ts', (): void => {
             throw new Error('MONGO_TEST_URL must be set.');
         }
 
-        client = await MongoClient.connect(process.env.MONGO_TEST_URL, {
-            poolSize: 1,
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
+        client = await MongoClient.connect(process.env.MONGO_TEST_URL);
 
         db = client.db();
 

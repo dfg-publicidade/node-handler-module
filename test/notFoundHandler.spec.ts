@@ -1,5 +1,6 @@
 import App from '@dfgpublicidade/node-app-module';
 import { HttpStatus } from '@dfgpublicidade/node-result-module';
+import Util from '@dfgpublicidade/node-util-module';
 import chai, { expect } from 'chai';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
@@ -13,7 +14,7 @@ import ChaiHttp = require('chai-http');
 /* Tests */
 chai.use(ChaiHttp);
 
-describe('notFoundHandler.ts', (): void => {
+describe.only('notFoundHandler.ts', (): void => {
     let app: App;
     let exp: Express;
     let httpServer: http.Server;
@@ -34,11 +35,7 @@ describe('notFoundHandler.ts', (): void => {
             throw new Error('MONGO_TEST_URL must be set.');
         }
 
-        client = await MongoClient.connect(process.env.MONGO_TEST_URL, {
-            poolSize: 1,
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
+        client = await MongoClient.connect(process.env.MONGO_TEST_URL);
 
         db = client.db();
 
@@ -171,6 +168,8 @@ describe('notFoundHandler.ts', (): void => {
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('message').eq('Not found');
 
+        await Util.delay100ms();
+
         const log: any = await db.collection(notfoundCollection).findOne({});
 
         expect(log).exist.and.have.property('app');
@@ -198,6 +197,8 @@ describe('notFoundHandler.ts', (): void => {
         expect(res.body).to.have.property('status').eq('warning');
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('message').eq('registroNaoEncontrado');
+
+        await Util.delay100ms();
 
         const log: any = await db.collection(notfoundCollection).findOne({});
 
