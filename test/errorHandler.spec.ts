@@ -1,4 +1,5 @@
 import App from '@dfgpublicidade/node-app-module';
+import Util from '@dfgpublicidade/node-util-module';
 import chai, { expect } from 'chai';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
@@ -125,6 +126,8 @@ describe('errorHandler.ts', (): void => {
         expect(res.body.content).to.have.property('message').eq('An error has occurred');
         expect(res.body.content).to.have.property('error').eq('Test error');
 
+        await Util.delay100ms();
+
         const log: any = await db.collection(errorCollection).findOne({});
 
         expect(log).exist.and.have.property('app');
@@ -153,6 +156,8 @@ describe('errorHandler.ts', (): void => {
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('message').eq('internalError');
         expect(res.body.content).to.have.property('error').eq('Test error');
+
+        await Util.delay100ms();
 
         const log: any = await db.collection(errorCollection).findOne({});
 

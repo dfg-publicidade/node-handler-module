@@ -130,6 +130,8 @@ describe('notFoundHandler.ts', (): void => {
         expect(res.body).to.have.property('content');
         expect(res.body.content).to.have.property('message').eq('recursoInexistente');
 
+        await Util.delay100ms();
+
         const log: any = await db.collection(notfoundCollection).findOne({});
 
         expect(log).exist.and.have.property('app');

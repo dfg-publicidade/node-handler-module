@@ -2,6 +2,7 @@ import App from '@dfgpublicidade/node-app-module';
 import Cache, { CacheLevel } from '@dfgpublicidade/node-cache-module';
 import Paginate from '@dfgpublicidade/node-pagination-module';
 import { HttpStatus } from '@dfgpublicidade/node-result-module';
+import Util from '@dfgpublicidade/node-util-module';
 import chai, { expect } from 'chai';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
@@ -416,6 +417,8 @@ describe('successHandler.ts', (): void => {
         expect(res.body).to.have.property('time');
         expect(res.body).to.have.property('status').eq('success');
         expect(res.body.content).to.have.property('_id').to.exist;
+
+        await Util.delay100ms();
 
         const log: any = await db.collection(activityCollection).findOne({});
 
