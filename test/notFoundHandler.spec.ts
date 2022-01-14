@@ -14,7 +14,7 @@ import ChaiHttp = require('chai-http');
 /* Tests */
 chai.use(ChaiHttp);
 
-describe.only('notFoundHandler.ts', (): void => {
+describe('notFoundHandler.ts', (): void => {
     let app: App;
     let exp: Express;
     let httpServer: http.Server;
