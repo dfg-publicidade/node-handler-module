@@ -32,6 +32,7 @@ const debug = (0, debug_1.default)('module:success-handler');
 class SuccessHandler {
     static handle(app, content, options) {
         return async (req, res, next) => {
+            var _a, _b;
             try {
                 debug('Handling success');
                 res.status((options === null || options === void 0 ? void 0 : options.status) ? options.status : node_result_module_1.HttpStatus.success);
@@ -74,9 +75,10 @@ class SuccessHandler {
                             node_cache_module_1.default.flush(level);
                         }
                     }
-                    if ((options === null || options === void 0 ? void 0 : options.log) && content && (content.id || content._id)) {
+                    if ((options === null || options === void 0 ? void 0 : options.log) && content) {
+                        const id = ((_a = content.entity) === null || _a === void 0 ? void 0 : _a.id) || ((_b = content.entity) === null || _b === void 0 ? void 0 : _b._id) || content.id || content._id;
                         await node_log_module_1.default.emit(app, req, app.config.log.collections.activity, {
-                            ref: content.id || content._id.toHexString()
+                            ref: id.toHexString ? id.toHexString() : id
                         });
                     }
                 }

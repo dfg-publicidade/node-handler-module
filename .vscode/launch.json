@@ -2,9 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "type": "node-terminal",
+            "command": "npm start",
             "address": "127.0.0.1",
-            "request": "attach",
+            "request": "launch",
             "name": "Launch via NPM",
             "timeout": 100000,
             "port": 9229

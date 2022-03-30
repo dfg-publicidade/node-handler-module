@@ -75,9 +75,11 @@ class SuccessHandler {
                         }
                     }
 
-                    if (options?.log && content && (content.id || content._id)) {
+                    if (options?.log && content) {
+                        const id: any = content.entity?.id || content.entity?._id || content.id || content._id;
+
                         await Log.emit(app, req, app.config.log.collections.activity, {
-                            ref: content.id || content._id.toHexString()
+                            ref: id.toHexString ? id.toHexString() : id
                         });
                     }
                 }
