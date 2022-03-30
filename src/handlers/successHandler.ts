@@ -79,7 +79,7 @@ class SuccessHandler {
                         const id: any = content.entity?.id || content.entity?._id || content.id || content._id;
 
                         await Log.emit(app, req, app.config.log.collections.activity, {
-                            ref: id.toHexString ? id.toHexString() : id
+                            ref: id?.toHexString ? id.toHexString() : id
                         });
                     }
                 }
